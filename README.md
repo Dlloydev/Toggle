@@ -15,7 +15,7 @@ Arduino switch and button library for components having 3 switched positions of 
 Declare each switch or button, by indicating any 2 digital pins:
 
 ```c++
-Toggle sw1(3, 4); // GPIO 3 and 4
+Toggle sw1(7, 8); // GPIO 7 and 8
 ```
 
 The library sets pin in input mode with the internal  pull-up resistor enabled by default. All switches have to be repeatedly polled which is done in the `loop()` function.
@@ -48,7 +48,7 @@ This sketch prints every sw1 transition (fully debounced and deglitched):
 ```c++
 #include <Toggle.h>
 
-Toggle sw1(3, 4);
+Toggle sw1(7, 8);
 
 void setup() {
   Serial.begin(115200);
