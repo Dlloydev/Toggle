@@ -1,0 +1,30 @@
+##########################################
+# Syntax Coloring Map For Toggle Library
+##########################################
+
+##########################################
+# Datatypes (KEYWORD1)
+##########################################
+
+Toggle	KEYWORD1
+sw	KEYWORD1
+
+##########################################
+# Methods and Functions (KEYWORD2)
+##########################################
+
+poll	KEYWORD2
+isUp	KEYWORD2
+isMid	KEYWORD2
+isDn	KEYWORD2
+wasUp	KEYWORD2
+wasMid	KEYWORD2
+wasDn	KEYWORD2
+upToMid	KEYWORD2
+midToDn	KEYWORD2
+dnToMid	KEYWORD2
+midToUp	KEYWORD2
+
+##########################################
+# Constants (LITERAL1)
+##########################################

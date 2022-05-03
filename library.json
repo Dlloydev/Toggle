@@ -1,0 +1,24 @@
+{
+  "name": "Toggle",
+  "version": "1.0.0",
+  "description": "Arduino library for 3-position switches (SP3T, On-Off-On). Simple to use, automatic pin mode configuration, uses very little memory. Ten status functions available",
+  "keywords": "toggle, switch",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/Dlloydev/Toggle"
+  },
+  "authors":
+  [
+    {
+      "name": "David Lloyd",
+      "email": "dlloydev@testcor.ca",
+      "url": "https://github.com/Dlloydev/Toggle",
+      "maintainer": true
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/Dlloydev/Toggle",
+  "frameworks": "arduino",
+  "platforms": "*"
+}
