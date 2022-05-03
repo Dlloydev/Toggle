@@ -37,7 +37,7 @@ midToUp	KEYWORD2
 # Constants (LITERAL1)
 ##########################################
 
-X	LITERAL1
+x	LITERAL1
 isUp	LITERAL1
 isMid	LITERAL1
 isDn	LITERAL1
