@@ -8,6 +8,14 @@
 
 Toggle	KEYWORD1
 sw	KEYWORD1
+sw1	KEYWORD1
+sw2	KEYWORD1
+sw3	KEYWORD1
+sw4	KEYWORD1
+sw5	KEYWORD1
+sw6	KEYWORD1
+sw7	KEYWORD1
+sw8	KEYWORD1
 
 ##########################################
 # Methods and Functions (KEYWORD2)
@@ -28,3 +36,15 @@ midToUp	KEYWORD2
 ##########################################
 # Constants (LITERAL1)
 ##########################################
+
+X	LITERAL1
+isUp	LITERAL1
+isMid	LITERAL1
+isDn	LITERAL1
+wasUp	LITERAL1
+wasMid	LITERAL1
+wasDn	LITERAL1
+upToMid	LITERAL1
+midToDn	LITERAL1
+dnToMid	LITERAL1
+midToUp	LITERAL1
