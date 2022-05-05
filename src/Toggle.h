@@ -1,31 +1,23 @@
 #pragma once
 #ifndef Toggle_h
 #define Toggle_h
+#include "Arduino.h"
 
 class Toggle {
 
   public:
 
-    enum class sw : uint8_t {x, isUp, isMid, isDn, upToMid, midToDn, dnToMid, midToUp};
-    Toggle(uint8_t pinA, uint8_t pinB, bool polarity);
-    Toggle(uint8_t pinA, uint8_t pinB);
-    Toggle(uint8_t pinA);
-    uint8_t poll();
-    bool isUp();
-    bool isMid();
-    bool isDn();
-    bool wasUp();
-    bool wasMid();
-    bool wasDn();
-    bool upToMid();
-    bool midToDn();
-    bool dnToMid();
-    bool midToUp();
+    Toggle(uint8_t pinA, uint8_t pinB = 0);
+    void poll();
+
+    bool isUP, isMID, isDN, UPtoMID, MIDtoDN, DNtoMID, MIDtoUP, isON, isOFF, ONtoOFF, OFFtoON;
 
   private:
 
-    uint8_t _pinA, _pinB, pinB = 0xFF, swStatus = 0, lastSwStatus = 0;
-    bool _polarity, polarity, firstRun = true;
-    sw sw = sw::x;
+    uint8_t regA = 0xAA, regB = 0x55, lastRegA = 0xAA, lastRegB = 0x55;
+    uint32_t sampleTime, ms;
+    uint8_t _pinA, _pinB;
+    bool firstRun = true;
+
 };
 #endif

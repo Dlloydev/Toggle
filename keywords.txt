@@ -16,35 +16,26 @@ sw5	KEYWORD1
 sw6	KEYWORD1
 sw7	KEYWORD1
 sw8	KEYWORD1
+sw9	KEYWORD1
 
 ##########################################
 # Methods and Functions (KEYWORD2)
 ##########################################
 
 poll	KEYWORD2
-isUp	KEYWORD2
-isMid	KEYWORD2
-isDn	KEYWORD2
-wasUp	KEYWORD2
-wasMid	KEYWORD2
-wasDn	KEYWORD2
-upToMid	KEYWORD2
-midToDn	KEYWORD2
-dnToMid	KEYWORD2
-midToUp	KEYWORD2
 
 ##########################################
 # Constants (LITERAL1)
 ##########################################
 
-x	LITERAL1
-isUp	LITERAL1
-isMid	LITERAL1
-isDn	LITERAL1
-wasUp	LITERAL1
-wasMid	LITERAL1
-wasDn	LITERAL1
-upToMid	LITERAL1
-midToDn	LITERAL1
-dnToMid	LITERAL1
-midToUp	LITERAL1
+isUP	LITERAL1
+isMID	LITERAL1
+isDN	LITERAL1
+UPtoMID	LITERAL1
+MIDtoDN	LITERAL1
+DNtoMID	LITERAL1
+MIDtoUP	LITERAL1
+isON	LITERAL1
+isOFF	LITERAL1
+ONtoOFF	LITERAL1
+OFFtoON	LITERAL1

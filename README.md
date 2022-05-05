@@ -1,66 +1,95 @@
 # Toggle
 ##  About
 
-Arduino switch and button library for components having 3 switched positions of control (SP3T or On-Off-On). Simple to use, automatically configures the pin mode and uses very little memory. Ten status functions available include one-shot transition status (depicting direction),  present status and previous position status. 
+Arduino switch and button library for SPST, SPDT or SP3T contacts. Simple to use, provides debouncing, deglitching and uses very little memory. Status indicates one-shot transitions (depicting direction) and current position status. 
 
-#### General features
+#### Features
 
-- Performs both de-bouncing and de-glitching.
+- Performs both debouncing and deglitching.
 - External pull-up resistors not required.
 - Very simple to use.
 - Very low memory use.
 
 ## Using Toggle
 
-Declare each switch or button, by indicating any 2 digital pins:
+Declaring a switch or button using 1 digital pin for SPST or SPDT contacts:
 
 ```c++
-Toggle sw1(7, 8); // GPIO 7 and 8
+Toggle sw1(6); // GPIO 6
 ```
 
-The library sets pin in input mode with the internal  pull-up resistor enabled by default. All switches have to be repeatedly polled which is done in the `loop()` function.
+Declaring a switch or button using 2 digital pins for SP3T contacts:
+
+```c++
+Toggle sw2(7, 8); // GPIO 7 and 8
+```
+
+The library sets the pin in input mode with pull-up resistor enabled. All switches have to be polled  in the `loop()` function.
 
 ```c++
 sw1.poll();
+sw2.poll();
 ```
 
-The switch status can be checked with the following 10 get functions:
+###### The switch status options when using 1 input pin:
 
 ```c++
-bool isUp();
-bool isMid();
-bool isDn();
-bool wasUp();
-bool wasMid();
-bool wasDn();
-bool upToMid();
-bool midToDn();
-bool dnToMid();
-bool midToUp();
+sw.isON;
+sw.isOFF;
+sw.ONtoOFF;
+sw.OFFtoON;
 ```
 
-The switch has 3 positions referred to as Up, Mid (center) and Dn (down). The first 3 functions will continuously return true if the switch is at that current position. The next 3 functions will also continuously return true if the switch was previously at that position. The last 4 functions return true (once only) if the switch has just transitioned to the checked position. This is very handy to execute code based on direction of switched operation or for any one-shot processing of code.
+The switch has 2 positions referred to as OFF (input is high) and ON (input is low). The first 2 status options will continuously return true if the switch is at that current position. The last 2 status options return true (once only) if the switch has just transitioned to the checked position. This is very handy to execute code based on direction of switched operation or for any one-shot processing of code.
+
+###### The switch status options when using 2 input pins:
+
+```c++
+sw.isUP;
+sw.isMID;
+sw.isDN;
+sw.UPtoMID;
+sw.MIDtoDN;
+sw.DNtoMID;
+sw.MIDtoUP;
+```
+
+The switch has 3 positions referred to as UP, MID (center) and DN (down). The first 3 status options will continuously return true if the switch is at that position. The last 4 status options return true (once only) if the switch has just transitioned to that position. This is very handy to execute code based on direction of switched operation or for any one-shot processing of code.
 
 #### Example Sketch
 
-This sketch prints every sw1 transition (fully debounced and deglitched):
+This sketch checks the status of a SP3T and a basic SPST switch or button:
 
 ```c++
 #include <Toggle.h>
 
-Toggle sw1(7, 8);
+Toggle sw1(6,7);
+Toggle sw2(8);
 
 void setup() {
+  while (!Serial) { }; // Leonardo
   Serial.begin(115200);
 }
 
 void loop() {
   sw1.poll();
+  sw2.poll();
 
-  if      (sw1.upToMid()) Serial.println(F("Up⇒Mid"));
-  else if (sw1.dnToMid()) Serial.println(F("Dn⇒Mid"));
-  else if (sw1.midToUp()) Serial.println(F("Mid⇒Up"));
-  else if (sw1.midToDn()) Serial.println(F("Mid⇒Dn"));
+  if (sw1.OFFtoON) Serial.println(F("sw1: OFF⇒ON"));
+  if (sw1.ONtoOFF) Serial.println(F("sw1: ON⇒OFF"));
+
+  if (sw2.OFFtoON) Serial.println(F("sw2: OFF⇒ON"));
+  if (sw2.ONtoOFF) Serial.println(F("sw2: ON⇒OFF"));
+
+  if (sw1.UPtoMID) Serial.println(F("sw1: UP⇒MID"));
+  if (sw1.MIDtoDN) Serial.println(F("sw1: MID⇒DN"));
+  if (sw1.DNtoMID) Serial.println(F("sw1: DN⇒MID"));
+  if (sw1.MIDtoUP) Serial.println(F("sw1: MID⇒UP"));
+
+  if (sw2.UPtoMID) Serial.println(F("sw1: UP⇒MID"));
+  if (sw2.MIDtoDN) Serial.println(F("sw1: MID⇒DN"));
+  if (sw2.DNtoMID) Serial.println(F("sw1: DN⇒MID"));
+  if (sw2.MIDtoUP) Serial.println(F("sw1: MID⇒UP"));
 }
 ```
 
@@ -75,7 +104,7 @@ A set of connections are shown where 0.1μF capacitors are added to provide the 
 - beneficial for interrupt applications
 - improves noise immunity when using longer cables 
 
-Connections are shown both without and with capacitors installed.
+Connections shown below are for 3-position switches, both without and with capacitors installed. Note: Connections for basic SPST or SPDT buttons or switches requiring only 1 input are similar and not shown. 
 
 
 
@@ -103,10 +132,6 @@ Connections are shown both without and with capacitors installed.
 
 
 
-### Software Signal Conditioning
-
-When monitoring the status of a 3-position switch, 2 inputs are used. Both software debouncing and deglitching are used for all 10 switch status conditions.
-
 #### Polling
 
 The switch inputs are polled in the main loop and the history of readings is stored in an 8-bit shift register (byte) where bit0 is the present reading and bit7 is the oldest reading. Data is shifted and updated every 10ms.
@@ -117,7 +142,7 @@ Using the input pullups provides a high 20K-50K impedance that makes the signals
 
 #### Debouncing
 
-Debouncing requires the shift register to be completely filled with 1's or 0's to signify a stable state. This occurs 80ms after the last transition. For the 2 signals that are monitored, contact closure will be detected in after at least 10ms have elapsed (de-glitch period). Contact release is detected in at least 80ms. For the unconnected middle position of the switch, logic status is determined (not measured) in at least 80ms for both contact closure and release. 
+Debouncing requires the shift register to be completely filled with 1's or 0's to signify a stable state. This occurs 80ms after the last transition. Contact closure will be detected after at least 10ms have elapsed (de-glitch period). Contact release is detected in at least 80ms. 
 
 ### References
 

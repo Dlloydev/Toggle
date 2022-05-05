@@ -1,110 +1,81 @@
 /****************************************************
-   Toggle Library for Arduino - Version 1.0.0
+   Toggle Library for Arduino - Version 2.0.0
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ****************************************************/
 
-#if ARDUINO >= 100
-#include "Arduino.h"
-#else
-#include "WProgram.h"
-#endif
-
 #include "Toggle.h"
+#include <Arduino.h>
 
-Toggle::Toggle(uint8_t pinA, uint8_t pinB, bool polarity)
+Toggle::Toggle(uint8_t pinA, uint8_t pinB)
+  : _pinA(pinA), _pinB(pinB)
 {
-  _pinA = pinA;
-  _pinB = pinB;
-  _polarity = polarity;
 }
 
-Toggle::Toggle(uint8_t pinA, uint8_t pinB) : Toggle::Toggle(pinA, pinB, polarity = HIGH) { }
-Toggle::Toggle(uint8_t pinA) : Toggle::Toggle(pinA, pinB = 0xFF, polarity = HIGH) { }
+void Toggle::poll() {
 
-uint8_t Toggle::poll() {
   if (firstRun) {
     firstRun = false;
-    if (_polarity) {
-      pinMode(_pinA, INPUT_PULLUP);
+    if (_pinA) pinMode(_pinA, INPUT_PULLUP);
+    if (_pinB) {
       pinMode(_pinB, INPUT_PULLUP);
     } else {
-      pinMode(_pinA, INPUT);
-      pinMode(_pinB, INPUT);
+      lastRegA = 0xFF;
+      regA = 0xFF;
     }
-  }
-  static uint8_t prevA = 0xAA, prevB = 0x55;
-  static uint32_t sampleTime, ms;
-
-  if (ms - sampleTime > 10) {
-    prevA = prevA << 1 | digitalRead(_pinA);
-    prevB = prevB << 1 | digitalRead(_pinB);
-    sampleTime = ms;
   }
   ms = millis();
 
-  // set switch positon status
-  if      (prevA == 0xFE && prevB == 0xFF) swStatus = static_cast<uint8_t>(sw::isUp);
-  else if (prevB == 0xFE && prevA == 0xFF) swStatus = static_cast<uint8_t>(sw::isDn);
-  else if (prevA == 0xFF && prevB == 0xFF) swStatus = static_cast<uint8_t>(sw::isMid);
+  lastRegA = regA;
+  lastRegB = regB;
 
-  // set switch transition status
-  if      (wasUp() && isMid()) swStatus = static_cast<uint8_t>(sw::upToMid);
-  else if (wasMid() && isDn()) swStatus = static_cast<uint8_t>(sw::midToDn);
-  else if (wasDn() && isMid()) swStatus = static_cast<uint8_t>(sw::dnToMid);
-  else if (wasMid() && isUp()) swStatus = static_cast<uint8_t>(sw::midToUp);
+  if (ms - sampleTime > 10) {
+    regA = regA << 1 | digitalRead(_pinA);
+    if (_pinB) {
+      regB = regB << 1 | digitalRead(_pinB);
+    }
+    else regB = 0xFF;
+    sampleTime = ms;
+  }
 
-  if (lastSwStatus != swStatus) sampleTime = ms;
-  lastSwStatus = swStatus;
-  return swStatus;
-}
+  if (_pinA && !_pinB) {
+    if (regA == 0xFF) {
+      isOFF = true;
+      isON = false;
+    }
+    if (regA == 0xFC) {
+      isON = true;
+      isOFF = false;
+    }
+    OFFtoON = false;
+    if (lastRegA == 0xFE && regA == 0xFC) OFFtoON = true;
+    ONtoOFF = false;
+    if (lastRegA == 0x7F && regA == 0xFF) ONtoOFF = true;
+  }
 
-bool Toggle::isUp() {
-  if (swStatus == static_cast<uint8_t>(sw::isUp)) return true;
-  return false;
-}
-
-bool Toggle::isMid() {
-  if (swStatus == static_cast<uint8_t>(sw::isMid)) return true;
-  return false;
-}
-
-bool Toggle::isDn() {
-  if (swStatus == static_cast<uint8_t>(sw::isDn)) return true;
-  return false;
-}
-
-bool Toggle::upToMid() {
-  if (swStatus == static_cast<uint8_t>(sw::upToMid)) return true;
-  return false;
-}
-
-bool Toggle::midToDn() {
-  if (swStatus == static_cast<uint8_t>(sw::midToDn)) return true;
-  return false;
-}
-
-bool Toggle::dnToMid() {
-  if (swStatus == static_cast<uint8_t>(sw::dnToMid)) return true;
-  return false;
-}
-
-bool Toggle::midToUp() {
-  if (swStatus == static_cast<uint8_t>(sw::midToUp)) return true;
-  return false;
-}
-
-bool Toggle::wasUp() {
-  if (lastSwStatus == static_cast<uint8_t>(sw::isUp)) return true;
-  return false;
-}
-
-bool Toggle::wasMid() {
-  if (lastSwStatus == static_cast<uint8_t>(sw::isMid)) return true;
-  return false;
-}
-
-bool Toggle::wasDn() {
-  if (lastSwStatus == static_cast<uint8_t>(sw::isDn)) return true;
-  return false;
+  if (_pinA && _pinB) {
+    if (lastRegA == 0xFE && regA == 0xFC && regB == 0xFF) {
+      isUP = true;
+      isMID = false;
+      isDN = false;
+    }
+    if (regA == 0xFF && regB == 0xFF) {
+      isUP = false;
+      isMID = true;
+      isDN = false;
+    }
+    if (lastRegB == 0xFE && regB == 0xFC && regA == 0xFF) {
+      isUP = false;
+      isMID = false;
+      isDN = true;
+    }
+    UPtoMID = false;
+    if (lastRegA == 0x1 && regA == 0x3 && regB == 0xFF) UPtoMID = true;
+    MIDtoDN = false;
+    if (lastRegB == 0xFE && regB == 0xFC && regA == 0xFF) MIDtoDN = true;
+    DNtoMID = false;
+    if (lastRegB == 0x1 && regB == 0x3 && regA == 0xFF) DNtoMID = true;
+    MIDtoUP = false;
+    if (lastRegA == 0xFE && regA == 0xFC && regB == 0xFF) MIDtoUP = true;
+  }
 }
