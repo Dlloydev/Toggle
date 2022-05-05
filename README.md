@@ -4,14 +4,14 @@
 
 # Toggle    [![arduino-library-badge](https://www.ardu-badge.com/badge/Toggle.svg?)](https://www.ardu-badge.com/Toggle) [![PlatformIO Registry](https://badges.registry.platformio.org/packages/dlloydev/library/Toggle.svg)](https://registry.platformio.org/libraries/dlloydev/Toggle)
 
-Arduino switch and button library for SPST, SPDT or SP3T contacts. Simple to use, provides debouncing, deglitching and uses very little memory. Status indicates one-shot transitions (depicting direction) and current position status. 
+Arduino switch and button library for SPST, SPDT or SP3T contacts. Simple to use, provides debouncing, deglitching and uses very little memory. Captures one-shot transitions (depicting direction) and current position status. 
 
 #### Features
 
 - Performs both debouncing and deglitching.
 - External pull-up resistors not required.
 - Very simple to use.
-- Very low memory use.
+- Ultra low memory use (14 bytes per button).
 
 ## Using Toggle
 
@@ -36,30 +36,30 @@ sw1.poll();
 sw2.poll();
 ```
 
-###### The switch status options when using 1 input pin:
+###### The switch functions when using 1 input pin:
 
 ```c++
-sw.isON;
-sw.isOFF;
-sw.ONtoOFF;
-sw.OFFtoON;
+bool isOFF();
+bool isON();
+bool OFFtoON();
+bool ONtoOFF();
 ```
 
-The switch has 2 positions referred to as OFF (input is high) and ON (input is low). The first 2 status options will continuously return true if the switch is at that current position. The last 2 status options return true (once only) if the switch has just transitioned to the checked position. This is very handy to execute code based on direction of switched operation or for any one-shot processing of code.
+The switch has 2 positions referred to as OFF (input is high) and ON (input is low). The first 2 functions will continuously return true if the switch is at that current position. The last 2 functions return true (once only) if the switch has just transitioned to the checked position. This is very handy to execute code based on direction of switched operation or for any one-shot processing of code.
 
-###### The switch status options when using 2 input pins:
+###### The switch functions when using 2 input pins:
 
 ```c++
-sw.isUP;
-sw.isMID;
-sw.isDN;
-sw.UPtoMID;
-sw.MIDtoDN;
-sw.DNtoMID;
-sw.MIDtoUP;
+bool isUP();
+bool isMID();
+bool isDN();
+bool UPtoMID();
+bool MIDtoDN();
+bool DNtoMID();
+bool MIDtoUP();
 ```
 
-The switch has 3 positions referred to as UP, MID (center) and DN (down). The first 3 status options will continuously return true if the switch is at that position. The last 4 status options return true (once only) if the switch has just transitioned to that position. This is very handy to execute code based on direction of switched operation or for any one-shot processing of code.
+The switch has 3 positions referred to as UP, MID (center) and DN (down). The first 3 functions will continuously return true if the switch is at that position. The last 4 functions return true (once only) if the switch has just transitioned to that position. This is very handy to execute code based on direction of switched operation or for any one-shot processing of code.
 
 #### Example Sketch
 
@@ -155,7 +155,18 @@ Using the input pullups provides a high 20K-50K impedance that makes the signals
 
 #### Debouncing
 
-Debouncing requires the shift register to be completely filled with 1's or 0's to signify a stable state. This occurs 80ms after the last transition. Contact closure will be detected after at least 10ms have elapsed (de-glitch period). Contact release is detected in at least 80ms. 
+Debouncing requires the shift register to be completely filled with 1's or 0's to signify a stable state. This occurs 80ms after the last transition. Contact closure will be detected after at least 10ms have elapsed (de-glitch period). Contact release is detected in at least 80ms.
+
+#### Memory Comparison on Leonardo with 2 buttons attached :
+
+| Library      | Version   | Bytes   | Bytes Used |
+| ------------ | --------- | ------- | ---------- |
+| Empty sketch | --        | 149     | --         |
+| **Toggle.h** | **2.0.1** | **177** | **28**     |
+| JC_Button.h  | 2.1.2     | 186     | 37         |
+| Bounce2.h    | 2.71.0    | 193     | 44         |
+| AceButton.h  | 1.9.2     | 205     | 56         |
+| ezButton.h   | 1.0.3     | 331     | 182        |
 
 ### References
 
