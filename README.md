@@ -1,5 +1,8 @@
-# Toggle
-##  About
+
+
+
+
+# Toggle    [![arduino-library-badge](https://www.ardu-badge.com/badge/Toggle.svg?)](https://www.ardu-badge.com/Toggle) [![PlatformIO Registry](https://badges.registry.platformio.org/packages/dlloydev/library/Toggle.svg)](https://registry.platformio.org/libraries/dlloydev/Toggle)
 
 Arduino switch and button library for SPST, SPDT or SP3T contacts. Simple to use, provides debouncing, deglitching and uses very little memory. Status indicates one-shot transitions (depicting direction) and current position status. 
 
@@ -11,6 +14,8 @@ Arduino switch and button library for SPST, SPDT or SP3T contacts. Simple to use
 - Very low memory use.
 
 ## Using Toggle
+
+Simple to use because pinMode, input pullups, de-glitch period, bounce period, and switch type (1 or 2 inputs) is automatically detected and configured.
 
 Declaring a switch or button using 1 digital pin for SPST or SPDT contacts:
 
@@ -24,7 +29,7 @@ Declaring a switch or button using 2 digital pins for SP3T contacts:
 Toggle sw2(7, 8); // GPIO 7 and 8
 ```
 
-The library sets the pin in input mode with pull-up resistor enabled. All switches have to be polled  in the `loop()` function.
+Each switch is polled  in the `loop()` function:
 
 ```c++
 sw1.poll();
@@ -97,14 +102,22 @@ void loop() {
 
 Switching between GND and digital pin is the default solution used by this library. External pull-up resistors can be added if desired, but the internal pullups should be sufficient for most applications. What might be of consideration is providing sufficient wetting current to overcome switch contact oxidation.
 
-A set of connections are shown where 0.1μF capacitors are added to provide the following benefits:
+A set of connections are shown where 0.1μF capacitors are optionally added to provide the following benefits:
 
 - contact wetting current
 - hardware signal filtering 
 - beneficial for interrupt applications
 - improves noise immunity when using longer cables 
 
-Connections shown below are for 3-position switches, both without and with capacitors installed. Note: Connections for basic SPST or SPDT buttons or switches requiring only 1 input are similar and not shown. 
+#### Connections shown below are for 2-position switches (SPST, SPDT, DPDT) using 1 input:
+
+![image](https://user-images.githubusercontent.com/63488701/166920176-7bd21bb6-10f9-4cd1-9467-0c2289e698c5.png)
+
+![image](https://user-images.githubusercontent.com/63488701/166920355-3edac199-4aae-4615-a790-152c2f3acec5.png)
+
+ 
+
+#### Connections shown below are for 3-position switches (SP3T, DP3T) using 2 inputs:
 
 
 
