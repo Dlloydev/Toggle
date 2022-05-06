@@ -22,10 +22,9 @@ class Toggle {
     bool DNtoMID();
     bool MIDtoUP();
 
-    uint8_t statusOne, statusTwo;
-
   private:
 
+    uint8_t statusOne, statusTwo;
     uint8_t regA = 0xFF, regB = 0xFF, lastRegA = 0xFF, lastRegB = 0xFF;
     uint32_t sampleTime;
     uint8_t _pinA, _pinB;

@@ -1,5 +1,5 @@
 /****************************************************
-   Toggle Library for Arduino - Version 2.1.0
+   Toggle Library for Arduino - Version 2.1.1
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ****************************************************/
@@ -16,9 +16,7 @@ void Toggle::poll() {
   if (firstRun) {
     firstRun = false;
     if (_pinA) pinMode(_pinA, INPUT_PULLUP);
-    if (_pinB) {
-      pinMode(_pinB, INPUT_PULLUP);
-    } 
+    if (_pinB) pinMode(_pinB, INPUT_PULLUP);
   }
   lastRegA = regA;
   lastRegB = regB;
