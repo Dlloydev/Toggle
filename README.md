@@ -162,7 +162,7 @@ Debouncing requires the shift register to be completely filled with 1's or 0's t
 | Library      | Version   | Bytes   | Bytes Used |
 | ------------ | --------- | ------- | ---------- |
 | Empty sketch | --        | 149     | --         |
-| **Toggle.h** | **2.1.0** | **177** | **28**     |
+| **Toggle.h** | **2.1.1** | **177** | **28**     |
 | JC_Button.h  | 2.1.2     | 186     | 37         |
 | Bounce2.h    | 2.71.0    | 193     | 44         |
 | AceButton.h  | 1.9.2     | 205     | 56         |
