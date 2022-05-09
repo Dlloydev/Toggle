@@ -14,7 +14,6 @@ const byte ledPin = LED_BUILTIN;
 byte ledState = LOW;
 
 Toggle sw1(buttonPin);
-Toggle sw2(buttonPin + 1);
 
 void setup() {
   pinMode(ledPin, OUTPUT);
@@ -24,11 +23,10 @@ void setup() {
 
 void loop() {
   sw1.poll();
-  sw2.poll();
-  if (sw1.ONtoOFF()) Serial.println(F("sw1: ON⇒OFF"));
   if (sw1.OFFtoON()) {
     Serial.println(F("sw1: OFF⇒ON"));
     ledState = !ledState;
     digitalWrite(ledPin, ledState);
   }
+  if (sw1.ONtoOFF()) Serial.println(F("sw1: ON⇒OFF"));
 }

@@ -1,5 +1,5 @@
 /****************************************************
-   Toggle Library for Arduino - Version 2.2.0
+   Toggle Library for Arduino - Version 2.2.1
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ****************************************************/
@@ -14,6 +14,8 @@ Toggle::Toggle(uint8_t *logic) : _logic(logic) { }
 void Toggle::poll() {
   if (firstRun) {
     firstRun = false;
+    lastUs = micros();
+    statesOne |= 0b00010000; // lastOFF = 1
 
     if (_pinA) {
       if (_inputMode == static_cast<uint8_t>(inMode::input_pullup)) pinMode(_pinA, INPUT_PULLUP);
@@ -27,9 +29,8 @@ void Toggle::poll() {
   }
   lastRegA = regA;
   lastRegB = regB;
-
-  if (millis() - sampleTime > 5) {
-    sampleTime = millis();
+  if (micros() - lastUs > _sampleUs) {
+    lastUs += _sampleUs;
     if (_inputMode <= 2) {
       regA = regA << 1 | digitalRead(_pinA);
       if (_pinB) regB = regB << 1 | digitalRead(_pinB);
@@ -44,7 +45,7 @@ void Toggle::poll() {
 }
 
 void Toggle::setStatesOne() {
-  // when using one input b3:ONtoOFF, b2:OFFtoON, b1:isON, b0:isOFF;
+  // when using one input b4:lastOFF, b3:ONtoOFF, b2:OFFtoON, b1:isON, b0:isOFF;
   if (lastRegA == 0xFF) {
     statesOne |= 0b00000001; // isOFF = 1
     statesOne &= 0b11111101; // isON = 0
@@ -54,10 +55,13 @@ void Toggle::setStatesOne() {
     statesOne &= 0b11111110; // isOFF = 0
   }
   statesOne &= 0b11111011; // OFFtoON = 0
-  //if (lastRegA == 0xFF && regA == 0xFE) statesOne |= 0b00000100; // OFFtoON = 1
-  if ((lastRegA & 1) == 0 && (regA & 3) == 0) statesOne |= 0b00000100; // OFFtoON = 1
+  if ((statesOne & 0b00010000) && (statesOne & 0b00000001) == 0) statesOne |= 0b00000100; // OFFtoON = 1
+
   statesOne &= 0b11110111; // ONtoOFF = 0
-  if (lastRegA == 0x7F && regA == 0xFF) statesOne |= 0b00001000; // ONtoOFF = 1
+  if ((statesOne & 0b00010000) == 0 && (statesOne & 0b00000001)) statesOne |= 0b00001000; // ONtoOFF = 1
+
+  if (statesOne & 1) statesOne |= 0b00010000; // lastOFF = 1
+  else statesOne &= 0b11101111; // lastOFF = 0
 }
 
 void Toggle::setStatesTwo() {
@@ -91,8 +95,8 @@ void Toggle::setInputMode(inMode inputMode) {
   _inputMode = static_cast<uint8_t>(inputMode);
 }
 
-uint8_t Toggle::getInputMode() {
-  return static_cast<uint8_t>(_inputMode);
+void Toggle::setSampleUs(uint16_t sampleUs) {
+  _sampleUs = sampleUs;
 }
 
 bool Toggle::isOFF() {
