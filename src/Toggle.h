@@ -25,6 +25,7 @@ class Toggle {
     bool MIDtoDN();
     bool DNtoMID();
     bool MIDtoUP();
+    bool getAllTransitions();
     void setInputMode(inMode inputMode);
     void setSampleUs(uint16_t sampleUs);
 

@@ -36,6 +36,7 @@ ONtoOFF	KEYWORD2
 OFFtoON	KEYWORD2
 setInputMode	KEYWORD2
 setSampleUs	KEYWORD2
+getAllTransitions	KEYWORD2
 
 ##########################################
 # Constants (LITERAL1)

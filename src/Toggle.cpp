@@ -98,6 +98,12 @@ void Toggle::setSampleUs(uint16_t sampleUs) {
   _sampleUs = sampleUs;
 }
 
+bool Toggle::getAllTransitions() {
+  if (_pinA && _pinB) return statesTwo & 0b01111000;
+  else if (_pinA) return statesOne & 0b00001100;
+  return false;
+}
+
 bool Toggle::isOFF() {
   return statesOne & 0b00000001;
 }
