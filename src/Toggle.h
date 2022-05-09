@@ -32,13 +32,11 @@ class Toggle {
     void setStatesOne();
     void setStatesTwo();
 
-    uint8_t _inputMode = static_cast<uint8_t>(inMode::input_pullup);
+    inMode _inputMode = inMode::input_pullup;
     uint8_t _pinA, _pinB;
     uint8_t *_logic;
-    float *_Input;
  
     bool firstRun = true;
-    inMode inputMode = inMode::input_pullup;
     uint8_t regA = 0xFF, regB = 0xFF, lastRegA = 0xFF, lastRegB = 0xFF;
     uint8_t statesOne, statesTwo;
     uint16_t _sampleUs = 5000;
