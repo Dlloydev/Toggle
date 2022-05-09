@@ -4,14 +4,17 @@
 
 # Toggle    [![arduino-library-badge](https://www.ardu-badge.com/badge/Toggle.svg?)](https://www.ardu-badge.com/Toggle) [![PlatformIO Registry](https://badges.registry.platformio.org/packages/dlloydev/library/Toggle.svg)](https://registry.platformio.org/libraries/dlloydev/Toggle)
 
-Arduino switch and button library for SPST, SPDT or SP3T contacts. Simple to use, provides debouncing, deglitching and uses very little memory. Captures one-shot transitions (depicting direction) and current position status. 
+Arduino library for deglitching and debouncing signals, buttons and switches.  One or two inputs can be monitored to decode transistions (depicting direction) for SPST, SPDT or SP3T contacts. Simple to use and requires very little memory. Captures one-shot transitions (depicting direction) and current status. 
+
+![image](https://user-images.githubusercontent.com/63488701/167322856-91eba08a-687d-4b0b-813a-97d32b092327.png)
 
 #### Features
 
 - Performs both debouncing and deglitching.
+- Works with signals, stored data, buttons and switches.
 - External pull-up resistors not required.
 - Very simple to use.
-- Ultra low memory use (14 bytes per button).
+- Ultra low memory use.
 
 ## Using Toggle
 
@@ -36,7 +39,7 @@ sw1.poll();
 sw2.poll();
 ```
 
-###### The switch functions when using 1 input pin:
+#### The switch functions when using 1 input pin:
 
 ```c++
 bool isOFF();
@@ -47,7 +50,7 @@ bool ONtoOFF();
 
 The switch has 2 positions referred to as OFF (input is high) and ON (input is low). The first 2 functions will continuously return true if the switch is at that current position. The last 2 functions return true (once only) if the switch has just transitioned to the checked position. This is very handy to execute code based on direction of switched operation or for any one-shot processing of code.
 
-###### The switch functions when using 2 input pins:
+#### The switch functions when using 2 input pins:
 
 ```c++
 bool isUP();
@@ -61,7 +64,19 @@ bool MIDtoUP();
 
 The switch has 3 positions referred to as UP, MID (center) and DN (down). The first 3 functions will continuously return true if the switch is at that position. The last 4 functions return true (once only) if the switch has just transitioned to that position. This is very handy to execute code based on direction of switched operation or for any one-shot processing of code.
 
-#### Example Sketch
+#### Other functions:
+
+```c++
+void setInputMode(inMode inputMode);
+
+// options:
+sw1.setInputMode(sw1.inMode::input_input);     // high impedance input
+sw1.setInputMode(sw1.inMode::input_pullup);    // pullup resistor enabled (default)
+sw1.setInputMode(sw1.inMode::input_pulldown);  // not used 
+sw1.setInputMode(sw1.inMode::input_logic);     // uses a byte variable for input data
+```
+
+#### Example Sketch:
 
 This sketch checks the status of a SP3T and a basic SPST switch or button:
 
@@ -80,21 +95,13 @@ void loop() {
   sw1.poll();
   sw2.poll();
 
-  if (sw1.OFFtoON) Serial.println(F("sw1: OFF⇒ON"));
-  if (sw1.ONtoOFF) Serial.println(F("sw1: ON⇒OFF"));
-
-  if (sw2.OFFtoON) Serial.println(F("sw2: OFF⇒ON"));
-  if (sw2.ONtoOFF) Serial.println(F("sw2: ON⇒OFF"));
-
   if (sw1.UPtoMID) Serial.println(F("sw1: UP⇒MID"));
   if (sw1.MIDtoDN) Serial.println(F("sw1: MID⇒DN"));
   if (sw1.DNtoMID) Serial.println(F("sw1: DN⇒MID"));
   if (sw1.MIDtoUP) Serial.println(F("sw1: MID⇒UP"));
 
-  if (sw2.UPtoMID) Serial.println(F("sw1: UP⇒MID"));
-  if (sw2.MIDtoDN) Serial.println(F("sw1: MID⇒DN"));
-  if (sw2.DNtoMID) Serial.println(F("sw1: DN⇒MID"));
-  if (sw2.MIDtoUP) Serial.println(F("sw1: MID⇒UP"));
+  if (sw2.OFFtoON) Serial.println(F("sw2: OFF⇒ON"));
+  if (sw2.ONtoOFF) Serial.println(F("sw2: ON⇒OFF"));
 }
 ```
 
@@ -147,23 +154,23 @@ A set of connections are shown where 0.1μF capacitors are optionally added to p
 
 #### Polling
 
-The switch inputs are polled in the main loop and the history of readings is stored in an 8-bit shift register (byte) where bit0 is the present reading and bit7 is the oldest reading. Data is shifted and updated every 10ms.
+The switch inputs are polled in the main loop and the history of readings is stored in an 8-bit shift register (byte) where bit0 is the present reading and bit7 is the oldest reading. Data is shifted and updated every 5ms.
 
 #### Deglitching
 
-Using the input pullups provides a high 20K-50K impedance that makes the signals more susceptible to noise pickup, especially if longer cables are used in a noisy environment. To improve this possible situation, software deglitching is internally set to 1 read sample which represents a minimum period of 10ms that any reading change is ignored.
+Using the input pullups provides a high 20K-50K impedance that makes the signals more susceptible to noise pickup, especially if longer cables are used in a noisy environment. To improve this possible situation, software deglitching is internally set to 1 read sample which represents a minimum period of 5ms that any reading change is ignored.
 
 #### Debouncing
 
-Debouncing requires the shift register to be completely filled with 1's or 0's to signify a stable state. This occurs 80ms after the last transition. Contact closure will be detected after at least 10ms have elapsed (de-glitch period). Contact release is detected in at least 80ms.
+Debouncing requires the shift register to be completely filled with 1's or 0's to signify a stable state. This occurs 40ms after bouncing stops. Contact closure will be detected after 2 stable samples (readings) are made. This allows single sample anomalies to be ignored (deglitched). Contact release is detected when 8 stable samples (readings) have been made.
 
 #### Memory Comparison on Leonardo with 2 buttons attached :
 
 | Library      | Version   | Bytes   | Bytes Used |
 | ------------ | --------- | ------- | ---------- |
 | Empty sketch | --        | 149     | --         |
-| **Toggle.h** | **2.1.1** | **177** | **28**     |
 | JC_Button.h  | 2.1.2     | 186     | 37         |
+| **Toggle.h** | **2.2.0** | **190** | **41**     |
 | Bounce2.h    | 2.71.0    | 193     | 44         |
 | AceButton.h  | 1.9.2     | 205     | 56         |
 | ezButton.h   | 1.0.3     | 331     | 182        |

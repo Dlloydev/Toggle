@@ -34,7 +34,15 @@ isON	KEYWORD2
 isOFF	KEYWORD2
 ONtoOFF	KEYWORD2
 OFFtoON	KEYWORD2
+setInputMode	KEYWORD2
+getInputMode	KEYWORD2
 
 ##########################################
 # Constants (LITERAL1)
 ##########################################
+
+input	LITERAL1
+input_pullup	LITERAL1
+input_pulldown	LITERAL1
+input_logic	LITERAL1
+input_float	LITERAL1
