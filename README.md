@@ -80,6 +80,9 @@ void setSampleUs(uint16_t sampleUs);
 // default sample period is 5000μs, range is 0-65535μs (0-65ms)
 // using 8 samples, the range for debounce will be (0-524ms)
 sw1.setSampleUs(5000); //μs
+
+bool getAllTransitions(); // returns for every switch transition
+digitalWrite(ledPin, sw1.getAllTransitions());  // example to blink an LED for each transition
 ```
 
 #### Example Sketch:
