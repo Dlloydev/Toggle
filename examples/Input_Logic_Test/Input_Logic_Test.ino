@@ -30,15 +30,14 @@ void setup() {
     logic = dat[i];
     sw1.poll();
 
-    bool off = sw1.isOFF();
-    bool on = sw1.isON();
-    digitalWrite(ledPin, on);
-
     for (int i = 0; i < 10; i++) { // zoom horizontal
-      plot("In", logic + 4, false);
-      plot("isOFF", off + 2, false);
-      plot("isON", on, true);
+      plot("In", logic + 8, false);
+      plot("isOFF", sw1.isOFF() + 6, false);
+      plot("OFF2ON", sw1.OFFtoON() + 4, false);
+      plot("ON2OFF", sw1.ONtoOFF() + 2, false);
+      plot("isON", sw1.isON(), true);
     }
+    digitalWrite(ledPin, sw1.isON());
     delay(50);
   }
 }

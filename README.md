@@ -6,7 +6,7 @@
 
 Arduino library for deglitching and debouncing signals, buttons and switches.  One or two inputs can be monitored to decode transistions (depicting direction) for SPST, SPDT or SP3T contacts. Simple to use and requires very little memory. Captures one-shot transitions (depicting direction) and current status. 
 
-![image](https://user-images.githubusercontent.com/63488701/167322856-91eba08a-687d-4b0b-813a-97d32b092327.png)
+![image](https://user-images.githubusercontent.com/63488701/167484715-85d71d32-ffa8-4b04-804c-bc0c2630b8d1.png)
 
 #### Features
 
