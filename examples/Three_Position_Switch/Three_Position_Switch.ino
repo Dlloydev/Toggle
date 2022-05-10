@@ -2,7 +2,7 @@
   Using Three Position Switches:
   ==============================
   A simple example that toggles an LED each time a 3-position switch has
-  transitioned. Both input pins are pulled high and connected to GND. The
+  transitioned.  Both input pins will have its pullup enabled. The
   switch is in the disconnected MID position if both inpits read high.
     • the built-in LED will blink once for each transition.
     • open Serial Monitor to view transition status.

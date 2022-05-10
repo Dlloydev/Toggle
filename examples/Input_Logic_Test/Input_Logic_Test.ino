@@ -25,6 +25,7 @@ void setup() {
   Serial.begin(115200);
 
   sw1.setInputMode(sw1.inMode::input_logic);
+  sw1.setSampleUs(100); // 100µs sample period
 
   for (int i = 0; i < 47; i++) {
     logic = dat[i];
@@ -38,7 +39,6 @@ void setup() {
       plot("isON", sw1.isON(), true);
     }
     digitalWrite(ledPin, sw1.isON());
-    delay(50);
   }
 }
 
