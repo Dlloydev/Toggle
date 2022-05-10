@@ -27,19 +27,19 @@ class Toggle {
     bool MIDtoUP();
     bool getAllTransitions();
     void setInputMode(inMode inputMode);
+    void setInvertMode(bool invert);
     void setSampleUs(uint16_t sampleUs);
 
-   private:
+  private:
     void setStatesOne();
     void setStatesTwo();
 
     inMode _inputMode = inMode::input_pullup;
     uint8_t _pinA, _pinB;
     uint8_t *_logic;
- 
+
     bool firstRun = true;
-    uint8_t regA = 0xFF, regB = 0xFF, lastRegA = 0xFF, lastRegB = 0xFF;
-    uint8_t statesOne, statesTwo;
+    uint8_t states = 0b00010000, regA = 7, regB = 7, lastRegA = 7, lastRegB = 7;
     uint16_t _sampleUs = 5000;
     uint32_t lastUs;
 

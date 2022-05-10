@@ -6,7 +6,7 @@
 
 Arduino library for deglitching and debouncing signals, buttons and switches.  One or two inputs can be monitored to decode transistions (depicting direction) for SPST, SPDT or SP3T contacts. Simple to use and requires very little memory. Captures one-shot transitions (depicting direction) and current status. 
 
-![image](https://user-images.githubusercontent.com/63488701/167484715-85d71d32-ffa8-4b04-804c-bc0c2630b8d1.png)
+![image](https://user-images.githubusercontent.com/63488701/167657951-a8ee4703-2336-4a1c-8230-8062402d8a6e.png)
 
 #### Features
 
@@ -72,8 +72,10 @@ void setInputMode(inMode inputMode);
 // options:
 sw1.setInputMode(sw1.inMode::input_input);     // high impedance input
 sw1.setInputMode(sw1.inMode::input_pullup);    // pullup resistor enabled (default)
-sw1.setInputMode(sw1.inMode::input_pulldown);  // not used 
+sw1.setInputMode(sw1.inMode::input_pulldown);  // pulldown resistor enabled (ESP32) 
 sw1.setInputMode(sw1.inMode::input_logic);     // uses a byte variable for input data
+
+void setInvertMode(bool invert); //set true if button or switch forces input high when pressed
 
 void setSampleUs(uint16_t sampleUs);
 
@@ -163,7 +165,7 @@ A set of connections are shown where 0.1μF capacitors are optionally added to p
 
 #### Polling
 
-The switch inputs are polled in the main loop and the history of readings is stored in an 8-bit shift register (byte) where bit0 is the present reading and bit7 is the oldest reading. Data is shifted and updated every 5ms.
+The switch inputs are polled in the main loop and the history of readings is stored in an 3-bit shift register (byte) where bit0 is the present reading and bit3 is the oldest reading. Data is shifted and updated every 5ms.
 
 #### Deglitching
 
@@ -171,15 +173,15 @@ Using the input pullups provides a high 20K-50K impedance that makes the signals
 
 #### Debouncing
 
-Debouncing requires the shift register to be completely filled with 1's or 0's to signify a stable state. This occurs 40ms after bouncing stops. Contact closure will be detected after 2 stable samples (readings) are made. This allows single sample anomalies to be ignored (deglitched). Contact release is detected when 8 stable samples (readings) have been made.
+Debouncing requires the shift register to be filled with 1's or 0's to signify a stable state. This occurs 15ms after bouncing stops. Contact closure will be detected after 2 stable samples (readings) are made. This allows single sample anomalies to be ignored (deglitched). Contact release is detected when 3 stable samples (readings) have been made.
 
 #### Memory Comparison on Leonardo with 2 buttons attached :
 
 | Library      | Version   | Bytes   | Bytes Used |
 | ------------ | --------- | ------- | ---------- |
 | Empty sketch | --        | 149     | --         |
+| **Toggle.h** | **2.2.3** | **185** | **36**     |
 | JC_Button.h  | 2.1.2     | 186     | 37         |
-| **Toggle.h** | **2.2.2** | **187** | 38         |
 | Bounce2.h    | 2.71.0    | 193     | 44         |
 | AceButton.h  | 1.9.2     | 205     | 56         |
 | ezButton.h   | 1.0.3     | 331     | 182        |

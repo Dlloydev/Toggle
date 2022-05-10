@@ -35,6 +35,7 @@ isOFF	KEYWORD2
 ONtoOFF	KEYWORD2
 OFFtoON	KEYWORD2
 setInputMode	KEYWORD2
+setInvertMode	KEYWORD2
 setSampleUs	KEYWORD2
 getAllTransitions	KEYWORD2
 
