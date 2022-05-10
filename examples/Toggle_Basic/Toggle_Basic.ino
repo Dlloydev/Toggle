@@ -2,9 +2,8 @@
   Toggle Basic Example:
   =====================
   A simple example that toggles an LED each time a button is pressed
-  or switch is closed. The input pin is pulled high and connected to GND.
-  Therefore, when released (OFF),the signal is HIGH. When pressed (ON),
-  the signal is LOW. The serial monitor indicates switch transitions.
+  or switch is closed.  The input pin will have its pullup enabled.
+  The serial monitor indicates all switch transitions.
   ***********************************************************************/
 
 #include <Toggle.h>
