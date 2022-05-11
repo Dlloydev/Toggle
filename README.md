@@ -6,6 +6,14 @@
 
 Arduino library for deglitching and debouncing signals, buttons and switches.  One or two inputs can be monitored to decode transistions (depicting direction) for SPST, SPDT or SP3T contacts. Simple to use and requires very little memory. Captures one-shot transitions (depicting direction) and current status. 
 
+### Digital Port Debouncing:
+
+![image](https://user-images.githubusercontent.com/63488701/167769114-92fcdfe5-1408-48d5-aeaa-efef8b3d4495.png)
+
+Now you can easily debounce a complete 8-bit port (8 signals) at a time in just one Toggle object. Several instances of Toggle can debounce 16-bit I/O expanders or other hardware, sensor data or stored data. The function `debouncePort()`is used to return the debounced data byte. More below.
+
+### Debouncing Buttons, Switches and 1-bit Data:
+
 ![image](https://user-images.githubusercontent.com/63488701/167657951-a8ee4703-2336-4a1c-8230-8062402d8a6e.png)
 
 #### Features
@@ -20,7 +28,7 @@ Arduino library for deglitching and debouncing signals, buttons and switches.  O
 
 Simple to use because pinMode, input pullups, de-glitch period, bounce period, and switch type (1 or 2 inputs) is automatically detected and configured.
 
-Declaring a switch or button using 1 digital pin for SPST or SPDT contacts:
+Declaring a switch, button or data using 1 digital input:
 
 ```c++
 Toggle sw1(6); // GPIO 6
@@ -63,6 +71,46 @@ bool MIDtoUP();
 ```
 
 The switch has 3 positions referred to as UP, MID (center) and DN (down). The first 3 functions will continuously return true if the switch is at that position. The last 4 functions return true (once only) if the switch has just transitioned to that position. This is very handy to execute code based on direction of switched operation or for any one-shot processing of code.
+
+#### Port Debouncer:
+
+This Port Debouncer uses a robust algorithm that removes spurious signal transitions. The algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared.
+
+```c++
+  if (_inputMode == inMode::input_port) {
+    for (int i = 0; i < 8; i++) {
+      if (*_logic & (1 << i) && regA & (1 << i) && lastRegA & (1 << i)) regB |= (1 << i);
+      if (!(*_logic & 1 << i) && !(regA & 1 << i) && !(lastRegA & 1 << i)) regB &= ~(1 << i);
+    }
+    lastRegA = regA;
+    regA = *_logic;
+    return regB;
+  }
+    return 0;
+}
+```
+
+From the `Port_Debouncer_Test` example, the following is the debug print with leading 0's added:
+
+```c++
+In: 00000000 Out: 00000000
+In: 10000001 Out: 00000000
+In: 10100011 Out: 00000000
+In: 00100111 Out: 00000001
+In: 00001110 Out: 00000011
+In: 00011110 Out: 00000111
+In: 00101111 Out: 00001111
+In: 01110110 Out: 00001111
+In: 11111100 Out: 00101111
+In: 11011000 Out: 01111110
+In: 01110000 Out: 01111100
+In: 01100011 Out: 01111000
+In: 11000000 Out: 01110000
+In: 10000100 Out: 01100000
+In: 00000000 Out: 01000000
+```
+
+Looking at the columns (bit data) top to bottom, it can be seen that the debounced `Out` data lags by only 2 samples (rows). It also can be seen that the port debouncer can tolerate a very noisy signal with up to 2 consecutive 1's or 0's that are anomalous or spurious in the `In` data.
 
 #### Other functions:
 

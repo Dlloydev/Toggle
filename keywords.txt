@@ -8,6 +8,7 @@
 
 Toggle	KEYWORD1
 sw	KEYWORD1
+sw0	KEYWORD1
 sw1	KEYWORD1
 sw2	KEYWORD1
 sw3	KEYWORD1
@@ -38,6 +39,7 @@ setInputMode	KEYWORD2
 setInvertMode	KEYWORD2
 setSampleUs	KEYWORD2
 getAllTransitions	KEYWORD2
+debouncePort	KEYWORD2
 
 ##########################################
 # Constants (LITERAL1)
@@ -47,4 +49,4 @@ input	LITERAL1
 input_pullup	LITERAL1
 input_pulldown	LITERAL1
 input_logic	LITERAL1
-input_float	LITERAL1
+input_port	LITERAL1

@@ -7,7 +7,7 @@ class Toggle {
 
   public:
 
-    enum class inMode : uint8_t {input = 0, input_pullup = 2, input_pulldown = 9,  input_logic = 250};
+    enum class inMode : uint8_t {input = 0, input_pullup = 2, input_pulldown = 9, input_logic = 250, input_port = 251};
 
     Toggle(uint8_t pinA);
     Toggle(uint8_t pinA, uint8_t pinB);
@@ -29,6 +29,7 @@ class Toggle {
     void setInputMode(inMode inputMode);
     void setInvertMode(bool invert);
     void setSampleUs(uint16_t sampleUs);
+    uint8_t debouncePort();
 
   private:
     void setStatesOne();

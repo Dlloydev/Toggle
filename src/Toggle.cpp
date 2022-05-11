@@ -30,9 +30,17 @@ void Toggle::poll() {
       else if (_inputMode == inMode::input_pulldown) pinMode(_pinB, INPUT_PULLDOWN);
 #endif
     }
+    if (_inputMode == inMode::input_port) {
+      regA = 0;
+      regB = 0;
+      lastRegA = 0;
+      lastRegB = 0;
+    }
   }
-  lastRegA = regA;
-  lastRegB = regB;
+  if (_inputMode != inMode::input_port) {
+    lastRegA = regA;
+    lastRegB = regB;
+  }
   if (micros() - lastUs > _sampleUs) {
     lastUs += _sampleUs;
     if (_inputMode == inMode::input || _inputMode == inMode::input_pullup || _inputMode == inMode::input_pulldown) {
@@ -45,14 +53,14 @@ void Toggle::poll() {
         else regB = regB << 1 | digitalRead(_pinB);
       }
     }
-    if (_inputMode == inMode::input_logic) {
+    else if (_inputMode == inMode::input_logic) {
       uint8_t tmp = *_logic;
       if (states & 0b10000000) tmp = !tmp; //invert
       regA = regA << 1 | tmp;
     }
   }
   if (_pinA && _pinB) setStatesTwo();
-  if (_pinA || _inputMode == inMode::input_logic) setStatesOne();
+  else if (_pinA || _inputMode == inMode::input_logic) setStatesOne();
 }
 
 void Toggle::setStatesOne() {
@@ -100,6 +108,25 @@ void Toggle::setStatesTwo() {
   if ((lastRegB & 7) == 7 && (regB & 7) == 6) states |= 0b00010000; // MIDtoDN = 1
   states &= 0b11011111; // DNtoMID = 0
   if ((lastRegB & 7) < 7 && (regB & 7) == 7) states |= 0b00100000; // DNtoMID = 1
+}
+
+//This Port Debouncer uses a robust algorithm that removes spurious signal transitions.
+//The algorithm adds only 3 sample periods of time lag to the output signal.
+//A 3-sample stable period is required for an output bit to change.
+//Therefore, to set an output bit, 3 consecutive 1's are required.
+//When 3 consecutive 0's are detected, that bit value is cleared.
+
+uint8_t Toggle::debouncePort() {
+  if (_inputMode == inMode::input_port) {
+    for (int i = 0; i < 8; i++) {
+      if (*_logic & (1 << i) && regA & (1 << i) && lastRegA & (1 << i)) regB |= (1 << i);
+      if (!(*_logic & 1 << i) && !(regA & 1 << i) && !(lastRegA & 1 << i)) regB &= ~(1 << i);
+    }
+    lastRegA = regA;
+    regA = *_logic;
+    return regB;
+  }
+    return 0;
 }
 
 void Toggle::setInputMode(inMode inputMode) {
