@@ -1,6 +1,6 @@
 {
   "name": "Toggle",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Arduino library for deglitching and debouncing signals, stored data, buttons and switches. Decodes transistions (depicting direction) for SPST, SPDT or SP3T contacts. Captures one-shot transitions and current status. Simple to use.",
   "keywords": "debounce, toggle, button, switch, data, deglitch",
   "repository":

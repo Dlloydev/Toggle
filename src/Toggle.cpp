@@ -1,5 +1,5 @@
 /****************************************************
-   Toggle Library for Arduino - Version 2.3.0
+   Toggle Library for Arduino - Version 2.4.0
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ****************************************************/
