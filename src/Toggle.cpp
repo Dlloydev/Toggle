@@ -32,8 +32,8 @@ void Toggle::poll() {
 #endif
     }
     if (_inputMode == inMode::input_portA || _inputMode == inMode::input_portB) {
-      _pinA;
-      _pinB;
+      _pinA = 0;
+      _pinB = 0;
       regA = 0;
       regB = 0;
       lastRegA = 0;
