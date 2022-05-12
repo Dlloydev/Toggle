@@ -10,7 +10,7 @@ Arduino library for deglitching and debouncing signals, buttons and switches.  O
 
 ![image](https://user-images.githubusercontent.com/63488701/167769114-92fcdfe5-1408-48d5-aeaa-efef8b3d4495.png)
 
-Now you can easily debounce a complete 8-bit port (8 signals) at a time in just one Toggle object. Several instances of Toggle can debounce 16-bit I/O expanders or other hardware, sensor data or stored data. The function `debouncePort()`is used to return the debounced data byte. More below.
+Now you can easily debounce one or two 8-bit ports (8-16 signals) at a time in just one Toggle object. Useful for16-bit I/O expanders or other hardware, sensor data or stored data. The functions `debouncePortA()`and `debouncePortB()`are used to return the debounced data bytes. More below.
 
 ### Debouncing Buttons, Switches and 1-bit Data:
 
@@ -77,20 +77,20 @@ The switch has 3 positions referred to as UP, MID (center) and DN (down). The fi
 This Port Debouncer uses a robust algorithm that removes spurious signal transitions. The algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared.
 
 ```c++
-  if (_inputMode == inMode::input_port) {
+  if (_inputMode == inMode::input_portA) {
     for (int i = 0; i < 8; i++) {
-      if (*_logic & (1 << i) && regA & (1 << i) && lastRegA & (1 << i)) regB |= (1 << i);
-      if (!(*_logic & 1 << i) && !(regA & 1 << i) && !(lastRegA & 1 << i)) regB &= ~(1 << i);
+      if (*_inA & (1 << i) && regA & (1 << i) && lastRegA & (1 << i)) _pinA |= (1 << i);
+      if (!(*_inA & 1 << i) && !(regA & 1 << i) && !(lastRegA & 1 << i)) _pinA &= ~(1 << i);
     }
     lastRegA = regA;
-    regA = *_logic;
-    return regB;
+    regA = *_inA;
+    return _pinA;
   }
-    return 0;
+  return 0;
 }
 ```
 
-From the `Port_Debouncer_Test` example, the following is the debug print with leading 0's added:
+From the `PortA_Debouncer_Test` example, the following is the debug print with leading 0's added:
 
 ```c++
 In: 00000000 Out: 00000000
@@ -223,16 +223,17 @@ Using the input pullups provides a high 20K-50K impedance that makes the signals
 
 Debouncing requires the shift register to be filled with 1's or 0's to signify a stable state. This occurs 15ms after bouncing stops. Contact closure will be detected after 2 stable samples (readings) are made. This allows single sample anomalies to be ignored (deglitched). Contact release is detected when 3 stable samples (readings) have been made.
 
-#### Memory Comparison on Leonardo with 2 buttons attached :
+#### Memory Comparison on Leonardo :
 
-| Library      | Version   | Bytes   | Bytes Used |
-| ------------ | --------- | ------- | ---------- |
-| Empty sketch | --        | 149     | --         |
-| **Toggle.h** | **2.2.3** | **185** | **36**     |
-| JC_Button.h  | 2.1.2     | 186     | 37         |
-| Bounce2.h    | 2.71.0    | 193     | 44         |
-| AceButton.h  | 1.9.2     | 205     | 56         |
-| ezButton.h   | 1.0.3     | 331     | 182        |
+| Library      | Version   | Buttons                 | Bytes   | Bytes Used |
+| ------------ | --------- | ----------------------- | ------- | ---------- |
+| Empty sketch | --        | 2                       | 149     | --         |
+| **Toggle.h** | **2.4.1** | **2**                   | **185** | **36**     |
+| JC_Button.h  | 2.1.2     | 2                       | 186     | 37         |
+| Bounce2.h    | 2.71.0    | 2                       | 193     | 44         |
+| AceButton.h  | 1.9.2     | 2                       | 205     | 56         |
+| **Toggle.h** | **2.4.1** | **128**  (16 ports x 8) | **321** | **172**    |
+| ezButton.h   | 1.0.3     | 2                       | 331     | 182        |
 
 ### References
 

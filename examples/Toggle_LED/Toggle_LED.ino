@@ -1,6 +1,6 @@
 /************************************************************************
-  Invert Example:
-  ===============
+  Toggle LED Example:
+  ===================
   A simple example that toggles an LED each time a button is pressed
   or switch is closed. The input pin will have an external pulldown
   resistor connected. The serial monitor indicates switch transitions.

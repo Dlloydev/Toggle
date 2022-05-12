@@ -1,5 +1,5 @@
 /****************************************************
-   Toggle Library for Arduino - Version 2.4.0
+   Toggle Library for Arduino - Version 2.4.1
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ****************************************************/
@@ -9,7 +9,8 @@
 
 Toggle::Toggle(uint8_t pinA) : _pinA(pinA) { }
 Toggle::Toggle(uint8_t pinA, uint8_t pinB) : _pinA(pinA), _pinB(pinB) { }
-Toggle::Toggle(uint8_t *logic) : _logic(logic) { }
+Toggle::Toggle(uint8_t *inA) : _inA(inA) { }
+Toggle::Toggle(uint8_t *inA, uint8_t *inB) : _inA(inA), _inB(inB) { }
 
 void Toggle::poll() {
   if (firstRun) {
@@ -30,14 +31,16 @@ void Toggle::poll() {
       else if (_inputMode == inMode::input_pulldown) pinMode(_pinB, INPUT_PULLDOWN);
 #endif
     }
-    if (_inputMode == inMode::input_port) {
+    if (_inputMode == inMode::input_portA || _inputMode == inMode::input_portB) {
+      _pinA;
+      _pinB;
       regA = 0;
       regB = 0;
       lastRegA = 0;
       lastRegB = 0;
     }
   }
-  if (_inputMode != inMode::input_port) {
+  if (_inputMode != inMode::input_portA && _inputMode != inMode::input_portB) {
     lastRegA = regA;
     lastRegB = regB;
   }
@@ -54,7 +57,7 @@ void Toggle::poll() {
       }
     }
     else if (_inputMode == inMode::input_logic) {
-      uint8_t tmp = *_logic;
+      uint8_t tmp = *_inA;
       if (states & 0b10000000) tmp = !tmp; //invert
       regA = regA << 1 | tmp;
     }
@@ -116,17 +119,30 @@ void Toggle::setStatesTwo() {
 //Therefore, to set an output bit, 3 consecutive 1's are required.
 //When 3 consecutive 0's are detected, that bit value is cleared.
 
-uint8_t Toggle::debouncePort() {
-  if (_inputMode == inMode::input_port) {
+uint8_t Toggle::debouncePortA() {
+  if (_inputMode == inMode::input_portA) {
     for (int i = 0; i < 8; i++) {
-      if (*_logic & (1 << i) && regA & (1 << i) && lastRegA & (1 << i)) regB |= (1 << i);
-      if (!(*_logic & 1 << i) && !(regA & 1 << i) && !(lastRegA & 1 << i)) regB &= ~(1 << i);
+      if (*_inA & (1 << i) && regA & (1 << i) && lastRegA & (1 << i)) _pinA |= (1 << i);
+      if (!(*_inA & 1 << i) && !(regA & 1 << i) && !(lastRegA & 1 << i)) _pinA &= ~(1 << i);
     }
     lastRegA = regA;
-    regA = *_logic;
-    return regB;
+    regA = *_inA;
+    return _pinA;
   }
-    return 0;
+  return 0;
+}
+
+uint8_t Toggle::debouncePortB() {
+  if (_inputMode == inMode::input_portA) {
+    for (int i = 0; i < 8; i++) {
+      if (*_inB & (1 << i) && regB & (1 << i) && lastRegB & (1 << i)) _pinB |= (1 << i);
+      if (!(*_inB & 1 << i) && !(regB & 1 << i) && !(lastRegB & 1 << i)) _pinB &= ~(1 << i);
+    }
+    lastRegB = regB;
+    regB = *_inB;
+    return _pinB;
+  }
+  return 0;
 }
 
 void Toggle::setInputMode(inMode inputMode) {
