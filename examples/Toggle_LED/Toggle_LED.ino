@@ -2,7 +2,7 @@
   Toggle LED Example:
   ===================
   A simple example that toggles an LED each time a button is pressed
-  or switch is closed. The input pin will have an external pulldown
+  or switch is closed. The input pin will have an external pullup
   resistor connected. The serial monitor indicates switch transitions.
   ***********************************************************************/
 
@@ -18,8 +18,6 @@ void setup() {
   pinMode(ledPin, OUTPUT);
   while (!Serial) { }; // Leonardo
   Serial.begin(115200);
-  sw1.setInputMode(sw1.inMode::input_pullup);
-  sw1.setInvertMode(true);
 }
 
 void loop() {

@@ -1,10 +1,10 @@
-/************************************************************************
+/***********************************************************************
   Input Pulldown Example:
   =======================
   A simple example that toggles an LED each time a button is pressed
   or switch is closed.  On an ESP32, the input pin will have its
   pulldown enabled. The serial monitor indicates all switch transitions.
-  ***********************************************************************/
+  **********************************************************************/
 
 #include <Toggle.h>
 

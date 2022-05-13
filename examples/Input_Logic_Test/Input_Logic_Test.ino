@@ -2,8 +2,8 @@
   Input logic Test Example:
   =========================
   A simple example that reads array bytes as the input signal.
-  • open Serial Monitor to view/copy the results in csv format.
   • open Serial Plotter to view the noisy input and debounced outputs.
+  • open Serial Monitor to view/copy the results in csv format.
   • can be used to monitor, deglitch and debounce an input representing
   RPM pulses, flow meter pulses, noisy comparator output signal, etc.
   ***********************************************************************/
@@ -20,7 +20,6 @@ byte logic;
 Toggle sw1(&logic);
 
 void setup() {
-  pinMode(ledPin, OUTPUT);
   while (!Serial) { }; // Leonardo
   Serial.begin(115200);
 
@@ -38,7 +37,6 @@ void setup() {
       plot("ON2OFF", sw1.ONtoOFF() + 2, false);
       plot("isON", sw1.isON(), true);
     }
-    digitalWrite(ledPin, sw1.isON());
   }
 }
 

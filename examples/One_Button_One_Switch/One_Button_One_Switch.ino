@@ -25,16 +25,36 @@ void setup() {
 
 void loop() {
   sw1.poll();
-  if (sw1.OFFtoON()) Serial.println(F("sw1: OFF⇒ON"));
-  if (sw1.ONtoOFF()) Serial.println(F("sw1: ON⇒OFF"));
-  digitalWrite(ledPin, sw1.getAllTransitions());
-  delay(10);
-
   sw2.poll();
-  if (sw2.UPtoMID()) Serial.println(F("sw2: UP⇒MID"));
-  if (sw2.MIDtoDN()) Serial.println(F("sw2: MID⇒DN"));
-  if (sw2.DNtoMID()) Serial.println(F("sw2: DN⇒MID"));
-  if (sw2.MIDtoUP()) Serial.println(F("sw2: MID⇒UP"));
-  digitalWrite(ledPin, sw2.getAllTransitions());
-  delay(10);
+
+  if (sw1.OFFtoON()) {
+    Serial.println(F("sw1: OFF⇒ON"));
+    blink();
+  }
+  if (sw1.ONtoOFF()) {
+    Serial.println(F("sw1: ON⇒OFF"));
+    blink();
+  }
+  if (sw2.UPtoMID()) {
+    Serial.println(F("sw2: UP⇒MID"));
+    blink();
+  }
+  if (sw2.MIDtoDN()) {
+    Serial.println(F("sw2: MID⇒DN"));
+    blink();
+  }
+  if (sw2.DNtoMID()) {
+    Serial.println(F("sw2: DN⇒MID"));
+    blink();
+  }
+  if (sw2.MIDtoUP()) {
+    Serial.println(F("sw2: MID⇒UP"));
+    blink();
+  }
+}
+
+void blink() {
+  digitalWrite(ledPin, HIGH);
+  delay(20);
+  digitalWrite(ledPin, LOW);
 }

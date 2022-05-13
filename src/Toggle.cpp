@@ -1,8 +1,8 @@
-/****************************************************
-   Toggle Library for Arduino - Version 2.5.0
+/************************************************
+   Toggle Library for Arduino - Version 2.5.1
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
- ****************************************************/
+ ************************************************/
 
 #include "Toggle.h"
 #include <Arduino.h>
@@ -69,7 +69,7 @@ bool Toggle::ONtoOFF() {
 }
 
 bool Toggle::isUP() {
-  return !(out & 0b00000001);
+  return isON();
 }
 
 bool Toggle::isMID() {
@@ -104,13 +104,22 @@ bool Toggle::DNtoMID() {
   return false;
 }
 
-bool Toggle::getAllTransitions() {
-  return (OFFtoON() || ONtoOFF() || UPtoMID() || MIDtoUP() || MIDtoDN() || DNtoMID());
+void Toggle::setInputMode(inMode inputMode) {
+  _inputMode = inputMode;
+}
+
+void Toggle::setInvertMode(bool invert) {
+  if (invert)states |= 0b01000000;
+  else states &= 0b10111111;
+}
+
+void Toggle::setSampleUs(uint16_t sampleUs) {
+  _sampleUs = sampleUs;
 }
 
 void Toggle::init() {
   if (states & 0b10000000) { //first run
-    states &= 0b01111111;
+    states &= 0b01111111; //clear first run
     lastUs = micros();
     if (_inA) {
       if (_inputMode == inMode::input_pullup) pinMode(_inA, INPUT_PULLUP);
@@ -134,17 +143,4 @@ void Toggle::init() {
       _in = 0;
     }
   }
-}
-
-void Toggle::setInputMode(inMode inputMode) {
-  _inputMode = inputMode;
-}
-
-void Toggle::setInvertMode(bool invert) {
-  if (invert)states |= 0b01000000;
-  else states &= 0b10111111;
-}
-
-void Toggle::setSampleUs(uint16_t sampleUs) {
-  _sampleUs = sampleUs;
 }

@@ -38,7 +38,6 @@ OFFtoON	KEYWORD2
 setInputMode	KEYWORD2
 setInvertMode	KEYWORD2
 setSampleUs	KEYWORD2
-getAllTransitions	KEYWORD2
 debouncePort	KEYWORD2
 
 ##########################################

@@ -4,23 +4,17 @@
 
 # Toggle    [![arduino-library-badge](https://www.ardu-badge.com/badge/Toggle.svg?)](https://www.ardu-badge.com/Toggle) [![PlatformIO Registry](https://badges.registry.platformio.org/packages/dlloydev/library/Toggle.svg)](https://registry.platformio.org/libraries/dlloydev/Toggle)
 
-Arduino library for deglitching and debouncing signals, buttons and switches.  One or two inputs can be monitored to decode transistions (depicting direction) for SPST, SPDT or SP3T contacts. Simple to use and requires very little memory. Captures one-shot transitions (depicting direction) and current status. 
+ Arduino bounce library for deglitching and debouncing hardware, signals and data. Works with all switch types, port expander and other 8-bit data sources. Robust algorithm ignores up to several consecutive spikes or dropouts. 
 
 ### Digital Port Debouncing:
 
 ![image](https://user-images.githubusercontent.com/63488701/167769114-92fcdfe5-1408-48d5-aeaa-efef8b3d4495.png)
 
-Now you can easily debounce  an 8-bit ports (8 signals) at a time in just one Toggle object. Useful for I/O expanders or other hardware, sensor data or stored data. The functions `debouncePortA()`and `debouncePortB()`are used to return the debounced data bytes. More below.
+Now you can easily debounce  an 8-bit ports (8 signals) at a time in just one Toggle object. Useful for I/O expanders or other hardware, sensor data or stored data. The function `debouncePort()`is used to return the debounced data bytes. More below.
 
-### Debouncing Buttons, Switches and 1-bit Data:
+### Debouncing Buttons, Switches and Data:
 
 #### ![image](https://user-images.githubusercontent.com/63488701/168192044-6dffe0f5-da86-4546-8eca-711f89f1ca70.png)
-
-- Performs both debouncing and deglitching.
-- Works with signals, stored data, buttons and switches.
-- External pull-up resistors not required.
-- Very simple to use.
-- Ultra low memory use.
 
 ## Using Toggle
 
@@ -89,7 +83,7 @@ uint8_t Toggle::debouncePort() {
 }
 ```
 
-From the `PortA_Debouncer_Test` example, the following is the debug print with leading 0's added:
+From the `Port_Debouncer_Test` example, the following is the debug print with leading 0's added:
 
 ```c++
 In: 00000000 Out: 00000000
@@ -120,18 +114,10 @@ void setInputMode(inMode inputMode);
 sw1.setInputMode(sw1.inMode::input_input);     // high impedance input
 sw1.setInputMode(sw1.inMode::input_pullup);    // pullup resistor enabled (default)
 sw1.setInputMode(sw1.inMode::input_pulldown);  // pulldown resistor enabled (ESP32) 
-sw1.setInputMode(sw1.inMode::input_logic);     // uses a byte variable for input data
+sw1.setInputMode(sw1.inMode::input_port);      // uses a byte variable for input data
 
-void setInvertMode(bool invert); //set true if button or switch forces input high when pressed
-
-void setSampleUs(uint16_t sampleUs);
-
-// default sample period is 5000μs, range is 0-65535μs (0-65ms)
-// using 8 samples, the range for debounce will be (0-524ms)
-sw1.setSampleUs(5000); //μs
-
-bool getAllTransitions(); // returns for every switch transition
-digitalWrite(ledPin, sw1.getAllTransitions());  // example to blink an LED for each transition
+void setInvertMode(bool invert);      // set true if button or switch forces input high when pressed
+void setSampleUs(uint16_t sampleUs);  // default sample period is 5000μs, range is 0-65535μs
 ```
 
 #### Example Sketch:
@@ -167,12 +153,9 @@ void loop() {
 
 Switching between GND and digital pin is the default solution used by this library. External pull-up resistors can be added if desired, but the internal pullups should be sufficient for most applications. What might be of consideration is providing sufficient wetting current to overcome switch contact oxidation.
 
-A set of connections are shown where 0.1μF capacitors are optionally added to provide the following benefits:
+A set of connections are shown where 0.1μF capacitors are optionally added. This adds contact wetting current and hardware signal filtering (beneficial for interrupt applications) . 
 
-- contact wetting current
-- hardware signal filtering 
-- beneficial for interrupt applications
-- improves noise immunity when using longer cables 
+
 
 #### Connections shown below are for 2-position switches (SPST, SPDT, DPDT) using 1 input:
 
@@ -212,26 +195,26 @@ A set of connections are shown where 0.1μF capacitors are optionally added to p
 
 #### Polling
 
-The switch inputs are polled in the main loop and the history of readings is stored in an 3-bit shift register (byte) where bit0 is the present reading and bit3 is the oldest reading. Data is shifted and updated every 5ms.
+The switch inputs are polled in the main loop and the default sample rate is 5000μs (5ms).
 
 #### Deglitching
 
-Using the input pullups provides a high 20K-50K impedance that makes the signals more susceptible to noise pickup, especially if longer cables are used in a noisy environment. To improve this possible situation, software deglitching is internally set to 1 read sample which represents a minimum period of 5ms that any reading change is ignored.
+Toggle uses a robust debouncer algorithm that ignores up to several consecutive spikes or dropouts.
 
 #### Debouncing
 
-Debouncing requires the shift register to be filled with 1's or 0's to signify a stable state. This occurs 15ms after bouncing stops. Contact closure will be detected after 2 stable samples (readings) are made. This allows single sample anomalies to be ignored (deglitched). Contact release is detected when 3 stable samples (readings) have been made.
+The debouncer algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared.
 
 #### Memory Comparison on Leonardo :
 
 | Library      | Version   | Buttons                    | Bytes   | Bytes Used |
 | ------------ | --------- | -------------------------- | ------- | ---------- |
 | Empty sketch | --        | 2                          | 149     | --         |
-| **Toggle.h** | **2.5.0** | **2**                      | **185** | **36**     |
+| **Toggle.h** | **2.5.1** | **2**                      | **185** | **36**     |
 | JC_Button.h  | 2.1.2     | 2                          | 186     | 37         |
 | Bounce2.h    | 2.71.0    | 2                          | 193     | 44         |
 | AceButton.h  | 1.9.2     | 2                          | 205     | 56         |
-| **Toggle.h** | **2.5.0** | **64**  (8 ports x 8-bits) | **321** | **172**    |
+| **Toggle.h** | **2.5.1** | **64**  (8 ports x 8-bits) | **321** | **172**    |
 | ezButton.h   | 1.0.3     | 2                          | 331     | 182        |
 
 ### References
