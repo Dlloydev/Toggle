@@ -18,7 +18,7 @@ void setup() {
   pinMode(ledPin, OUTPUT);
   while (!Serial) { }; // Leonardo
   Serial.begin(115200);
-  sw1.setInputMode(sw1.inMode::input);
+  sw1.setInputMode(sw1.inMode::input_pullup);
   sw1.setInvertMode(true);
 }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
-  PortA Debouncer Test Example:
-  =============================
+  Port Debouncer Test Example:
+  ============================
   This example demonstrates how you can easily debounce a complete 8-bit port
   (8 signals) at a time in just one Toggle object.
   
@@ -48,24 +48,24 @@ const byte dat[15] = {
   0b00000000
 };
 
-byte portA;
+byte port;
 
-Toggle sw1(&portA);
+Toggle sw1(&port);
 
 void setup() {
   while (!Serial) { }; // Leonardo
   Serial.begin(115200);
 
-  sw1.setInputMode(sw1.inMode::input_portA);
+  sw1.setInputMode(sw1.inMode::input_port);
   sw1.setSampleUs(100); // 100µs sample period
 
   for (int i = 0; i < 15; i++) {
-    portA = dat[i];
+    port = dat[i];
     sw1.poll();
     Serial.print(F("In: "));
     Serial.print(dat[i], BIN);
     Serial.print(F(" Out: "));
-    Serial.println(sw1.debouncePortA(), BIN);
+    Serial.println(sw1.debouncePort(), BIN);
   }
 }
 

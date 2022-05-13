@@ -24,7 +24,6 @@ void setup() {
 
 void loop() {
   sw1.poll();
-  digitalWrite(ledPin, sw1.getAllTransitions());
   if (sw1.UPtoMID()) Serial.println(F("sw1: UP⇒MID"));
   if (sw1.MIDtoDN()) Serial.println(F("sw1: MID⇒DN"));
   if (sw1.DNtoMID()) Serial.println(F("sw1: DN⇒MID"));

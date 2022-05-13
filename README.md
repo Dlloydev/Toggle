@@ -10,13 +10,11 @@ Arduino library for deglitching and debouncing signals, buttons and switches.  O
 
 ![image](https://user-images.githubusercontent.com/63488701/167769114-92fcdfe5-1408-48d5-aeaa-efef8b3d4495.png)
 
-Now you can easily debounce one or two 8-bit ports (8-16 signals) at a time in just one Toggle object. Useful for16-bit I/O expanders or other hardware, sensor data or stored data. The functions `debouncePortA()`and `debouncePortB()`are used to return the debounced data bytes. More below.
+Now you can easily debounce  an 8-bit ports (8 signals) at a time in just one Toggle object. Useful for I/O expanders or other hardware, sensor data or stored data. The functions `debouncePortA()`and `debouncePortB()`are used to return the debounced data bytes. More below.
 
 ### Debouncing Buttons, Switches and 1-bit Data:
 
-![image](https://user-images.githubusercontent.com/63488701/167657951-a8ee4703-2336-4a1c-8230-8062402d8a6e.png)
-
-#### Features
+#### ![image](https://user-images.githubusercontent.com/63488701/168192044-6dffe0f5-da86-4546-8eca-711f89f1ca70.png)
 
 - Performs both debouncing and deglitching.
 - Works with signals, stored data, buttons and switches.
@@ -77,16 +75,17 @@ The switch has 3 positions referred to as UP, MID (center) and DN (down). The fi
 This Port Debouncer uses a robust algorithm that removes spurious signal transitions. The algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared.
 
 ```c++
-  if (_inputMode == inMode::input_portA) {
-    for (int i = 0; i < 8; i++) {
-      if (*_inA & (1 << i) && regA & (1 << i) && lastRegA & (1 << i)) _pinA |= (1 << i);
-      if (!(*_inA & 1 << i) && !(regA & 1 << i) && !(lastRegA & 1 << i)) _pinA &= ~(1 << i);
-    }
-    lastRegA = regA;
-    regA = *_inA;
-    return _pinA;
+uint8_t Toggle::debouncePort() {
+  pOut = out;
+  uint8_t bits = 2;
+  if (_inputMode == inMode::input_port) bits = 8;
+  for (int i = 0; i < bits; i++) {
+    if (dat & (1 << i) && pDat & (1 << i) && ppDat & (1 << i)) out |= (1 << i);
+    else if (!(dat & 1 << i) && !(pDat & 1 << i) && !(ppDat & 1 << i)) out &= ~(1 << i);
   }
-  return 0;
+  ppDat = pDat;
+  pDat = dat;
+  return out;
 }
 ```
 
@@ -225,15 +224,15 @@ Debouncing requires the shift register to be filled with 1's or 0's to signify a
 
 #### Memory Comparison on Leonardo :
 
-| Library      | Version   | Buttons                 | Bytes   | Bytes Used |
-| ------------ | --------- | ----------------------- | ------- | ---------- |
-| Empty sketch | --        | 2                       | 149     | --         |
-| **Toggle.h** | **2.4.1** | **2**                   | **185** | **36**     |
-| JC_Button.h  | 2.1.2     | 2                       | 186     | 37         |
-| Bounce2.h    | 2.71.0    | 2                       | 193     | 44         |
-| AceButton.h  | 1.9.2     | 2                       | 205     | 56         |
-| **Toggle.h** | **2.4.1** | **128**  (16 ports x 8) | **321** | **172**    |
-| ezButton.h   | 1.0.3     | 2                       | 331     | 182        |
+| Library      | Version   | Buttons                    | Bytes   | Bytes Used |
+| ------------ | --------- | -------------------------- | ------- | ---------- |
+| Empty sketch | --        | 2                          | 149     | --         |
+| **Toggle.h** | **2.5.0** | **2**                      | **185** | **36**     |
+| JC_Button.h  | 2.1.2     | 2                          | 186     | 37         |
+| Bounce2.h    | 2.71.0    | 2                          | 193     | 44         |
+| AceButton.h  | 1.9.2     | 2                          | 205     | 56         |
+| **Toggle.h** | **2.5.0** | **64**  (8 ports x 8-bits) | **321** | **172**    |
+| ezButton.h   | 1.0.3     | 2                          | 331     | 182        |
 
 ### References
 

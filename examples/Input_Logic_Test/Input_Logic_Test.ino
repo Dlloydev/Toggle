@@ -24,7 +24,7 @@ void setup() {
   while (!Serial) { }; // Leonardo
   Serial.begin(115200);
 
-  sw1.setInputMode(sw1.inMode::input_logic);
+  sw1.setInputMode(sw1.inMode::input_port);
   sw1.setSampleUs(100); // 100µs sample period
 
   for (int i = 0; i < 47; i++) {

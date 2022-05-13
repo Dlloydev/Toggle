@@ -39,8 +39,7 @@ setInputMode	KEYWORD2
 setInvertMode	KEYWORD2
 setSampleUs	KEYWORD2
 getAllTransitions	KEYWORD2
-debouncePortA	KEYWORD2
-debouncePortB	KEYWORD2
+debouncePort	KEYWORD2
 
 ##########################################
 # Constants (LITERAL1)
@@ -49,6 +48,4 @@ debouncePortB	KEYWORD2
 input	LITERAL1
 input_pullup	LITERAL1
 input_pulldown	LITERAL1
-input_logic	LITERAL1
-input_portA	LITERAL1
-input_portB	LITERAL1
+input_port	LITERAL1
