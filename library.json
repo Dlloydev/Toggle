@@ -1,6 +1,6 @@
 {
   "name": "Toggle",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "Arduino bounce library for deglitching and debouncing hardware, signals and data. Works with all switch types, port expander and other 8-bit data sources. Robust algorithm ignores up to several consecutive spikes or dropouts.",
   "keywords": "debounce, toggle, button, switch, data, deglitch",
   "repository":

@@ -1,26 +1,24 @@
 
 
-
-
 # Toggle    [![arduino-library-badge](https://www.ardu-badge.com/badge/Toggle.svg?)](https://www.ardu-badge.com/Toggle) [![PlatformIO Registry](https://badges.registry.platformio.org/packages/dlloydev/library/Toggle.svg)](https://registry.platformio.org/libraries/dlloydev/Toggle)
 
  Arduino bounce library for deglitching and debouncing hardware, signals and data. Works with all switch types, port expander and other 8-bit data sources. Robust algorithm ignores up to several consecutive spikes or dropouts. 
 
-### Digital Port Debouncing:
+### Debouncing Input Values
+
+To bypass Arduino's pin functions and link to input data values directly, use `input_bit` mode for debouncing only bit0 or use`input_port` mode (8-bit debouncing) for I/O expanders, sensor data or stored data.  For examples, see  `Input_Bit_Test.ino` and `Input_Port_Test.ino`
 
 ![image](https://user-images.githubusercontent.com/63488701/167769114-92fcdfe5-1408-48d5-aeaa-efef8b3d4495.png)
 
-Now you can easily debounce  an 8-bit ports (8 signals) at a time in just one Toggle object. Useful for I/O expanders or other hardware, sensor data or stored data. The function `debouncePort()`is used to return the debounced data bytes. More below.
-
-### Debouncing Buttons, Switches and Data:
+### Debouncing Buttons and Switches:
 
 #### ![image](https://user-images.githubusercontent.com/63488701/168192044-6dffe0f5-da86-4546-8eca-711f89f1ca70.png)
 
 ## Using Toggle
 
-Simple to use because pinMode, input pullups, de-glitch period, bounce period, and switch type (1 or 2 inputs) is automatically detected and configured.
+Simple to use because pinMode, input pullups and sample period for de-glitching and debouncing are automatically configured.
 
-Declaring a switch, button or data using 1 digital input:
+Declaring a switch, button or data using 1 digital pin input:
 
 ```c++
 Toggle sw1(6); // GPIO 6
@@ -42,6 +40,7 @@ sw2.poll();
 #### The switch functions when using 1 input pin:
 
 ```c++
+// when using input_port mode you can select any bit i.e. isOFF(3); for bit3
 bool isOFF();
 bool isON();
 bool OFFtoON();
@@ -64,16 +63,17 @@ bool MIDtoUP();
 
 The switch has 3 positions referred to as UP, MID (center) and DN (down). The first 3 functions will continuously return true if the switch is at that position. The last 4 functions return true (once only) if the switch has just transitioned to that position. This is very handy to execute code based on direction of switched operation or for any one-shot processing of code.
 
-#### Port Debouncer:
+#### Input Debouncer:
 
-This Port Debouncer uses a robust algorithm that removes spurious signal transitions. The algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared.
+This Input Debouncer uses a robust algorithm that removes spurious signal transitions. The algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared.
 
 ```c++
-uint8_t Toggle::debouncePort() {
+uint8_t Toggle::debounceInput(uint8_t bit) {
   pOut = out;
   uint8_t bits = 2;
+  if (_inputMode == inMode::input_bit) bits = 1;
   if (_inputMode == inMode::input_port) bits = 8;
-  for (int i = 0; i < bits; i++) {
+  for (int i = bit; i < bit + bits; i++) {
     if (dat & (1 << i) && pDat & (1 << i) && ppDat & (1 << i)) out |= (1 << i);
     else if (!(dat & 1 << i) && !(pDat & 1 << i) && !(ppDat & 1 << i)) out &= ~(1 << i);
   }
@@ -83,7 +83,7 @@ uint8_t Toggle::debouncePort() {
 }
 ```
 
-From the `Port_Debouncer_Test` example, the following is the debug print with leading 0's added:
+From the `Input_Port_Test.ino` example, the following is the debug print with leading 0's added:
 
 ```c++
 In: 00000000 Out: 00000000
@@ -103,7 +103,7 @@ In: 10000100 Out: 01100000
 In: 00000000 Out: 01000000
 ```
 
-Looking at the columns (bit data) top to bottom, it can be seen that the debounced `Out` data lags by only 2 samples (rows). It also can be seen that the port debouncer can tolerate a very noisy signal with up to 2 consecutive 1's or 0's that are anomalous or spurious in the `In` data.
+Looking at the columns (bit data) top to bottom, it can be seen that the debounced `Out` data lags by only 2 samples (rows). It also can be seen that the input debouncer can tolerate a very noisy signal with up to 2 consecutive 1's or 0's that are anomalous or spurious in the `In` data.
 
 #### Other functions:
 
@@ -116,8 +116,10 @@ sw1.setInputMode(sw1.inMode::input_pullup);    // pullup resistor enabled (defau
 sw1.setInputMode(sw1.inMode::input_pulldown);  // pulldown resistor enabled (ESP32) 
 sw1.setInputMode(sw1.inMode::input_port);      // uses a byte variable for input data
 
-void setInvertMode(bool invert);      // set true if button or switch forces input high when pressed
-void setSampleUs(uint16_t sampleUs);  // default sample period is 5000μs, range is 0-65535μs
+void setInvertMode(bool invert);         // set true if button or switch forces input high when pressed
+void setSampleUs(uint16_t sampleUs);     // default sample period is 5000μs, range is 0-65535μs
+uint8_t debounceInput(uint8_t bit = 0);  // returns debounced output
+
 ```
 
 #### Example Sketch:
@@ -210,11 +212,11 @@ The debouncer algorithm adds only 2 sample periods of time lag to the output sig
 | Library      | Version   | Buttons                    | Bytes   | Bytes Used |
 | ------------ | --------- | -------------------------- | ------- | ---------- |
 | Empty sketch | --        | 2                          | 149     | --         |
-| **Toggle.h** | **2.5.1** | **2**                      | **185** | **36**     |
+| **Toggle.h** | **2.5.2** | **2**                      | **185** | **36**     |
 | JC_Button.h  | 2.1.2     | 2                          | 186     | 37         |
 | Bounce2.h    | 2.71.0    | 2                          | 193     | 44         |
 | AceButton.h  | 1.9.2     | 2                          | 205     | 56         |
-| **Toggle.h** | **2.5.1** | **64**  (8 ports x 8-bits) | **321** | **172**    |
+| **Toggle.h** | **2.5.2** | **64**  (8 ports x 8-bits) | **321** | **172**    |
 | ezButton.h   | 1.0.3     | 2                          | 331     | 182        |
 
 ### References

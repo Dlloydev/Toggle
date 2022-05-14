@@ -1,9 +1,10 @@
-/****************************************************************************
-  Port Debouncer Test Example:
-  ============================
-  This example demonstrates how you can easily debounce a complete 8-bit port
-  (8 signals) at a time in just one Toggle object.
-  
+/*************************************************************************
+  Input Port Debouncer Test Example:
+  ==================================
+  This example demonstrates how you can debounce an 8-bit byte (8 signals)
+  in just one Toggle object. The Arduino pin functions are not used.
+  The input value is linked to a byte variable in the sketch.
+
   This is the expected serial print with leading 0's added:
 
   In: 00000000 Out: 00000000
@@ -24,9 +25,9 @@
 
   Looking at the columns (bit data) top to bottom, it can be seen that the
   debounced "Out" data lags by only 2 samples (rows). It also can be seen
-  that the port debouncer can tolerate a very noisy signal with up to 2
+  that the input debouncer can tolerate a very noisy signal with up to 2
   consecutive 1's or 0's that are anomalous or spurious in the In data.
-  ***************************************************************************/
+  ************************************************************************/
 
 #include <Toggle.h>
 
@@ -48,24 +49,24 @@ const byte dat[15] = {
   0b00000000
 };
 
-byte port;
+byte Input;
 
-Toggle sw1(&port);
+Toggle myInput(&Input);
 
 void setup() {
   while (!Serial) { }; // Leonardo
   Serial.begin(115200);
 
-  sw1.setInputMode(sw1.inMode::input_port);
-  sw1.setSampleUs(100); // 100µs sample period
+  myInput.setInputMode(myInput.inMode::input_port);
+  myInput.setSampleUs(20); // sample ASAP
 
   for (int i = 0; i < 15; i++) {
-    port = dat[i];
-    sw1.poll();
+    Input = dat[i];
+    myInput.poll();
     Serial.print(F("In: "));
     Serial.print(dat[i], BIN);
     Serial.print(F(" Out: "));
-    Serial.println(sw1.debouncePort(), BIN);
+    Serial.println(myInput.debounceInput(), BIN);
   }
 }
 

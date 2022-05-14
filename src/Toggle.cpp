@@ -1,5 +1,5 @@
 /************************************************
-   Toggle Library for Arduino - Version 2.5.1
+   Toggle Library for Arduino - Version 2.5.2
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ************************************************/
@@ -7,11 +7,12 @@
 #include "Toggle.h"
 #include <Arduino.h>
 
+Toggle::Toggle() { }
 Toggle::Toggle(uint8_t inA) : _inA(inA) { }
 Toggle::Toggle(uint8_t inA, uint8_t inB) : _inA(inA), _inB(inB) { }
 Toggle::Toggle(uint8_t *in) : _in(in) { }
 
-void Toggle::poll() {
+void Toggle::poll(uint8_t bit) {
   init();
   if (micros() - lastUs > _sampleUs) {
     lastUs += _sampleUs;
@@ -19,23 +20,26 @@ void Toggle::poll() {
       if (_inA) dat = digitalRead(_inA);
       if (_inB) dat += digitalRead(_inB) * 2;
     }
-    if (_inputMode == inMode::input_port) dat = *_in;
+    if (_inputMode == inMode::input_bit || _inputMode == inMode::input_port) dat = *_in;
     if (states & 0b01000000) dat = ~dat; //bitwise not
-    debouncePort();
+    if (bit > 7) bit = 0;
+    debounceInput(bit);
   } //run sample
 } //poll
 /*
-  The debouncePort() function uses a robust algorithm that removes spurious
+  The debounceInput() function uses a robust algorithm that removes spurious
   signal transitions and only adds 2 sample periods time lag to the output
   signal. A 3-sample stable period is required for an output bit to change.
   Each output bit is set after 3 consecutive 1's are detected and cleared
   after 3 consecutive 0's are detected.
 */
-uint8_t Toggle::debouncePort() {
+
+uint8_t Toggle::debounceInput(uint8_t bit) {
   pOut = out;
   uint8_t bits = 2;
+  if (_inputMode == inMode::input_bit) bits = 1;
   if (_inputMode == inMode::input_port) bits = 8;
-  for (int i = 0; i < bits; i++) {
+  for (int i = bit; i < bit + bits; i++) {
     if (dat & (1 << i) && pDat & (1 << i) && ppDat & (1 << i)) out |= (1 << i);
     else if (!(dat & 1 << i) && !(pDat & 1 << i) && !(ppDat & 1 << i)) out &= ~(1 << i);
   }
@@ -44,24 +48,26 @@ uint8_t Toggle::debouncePort() {
   return out;
 }
 
-bool Toggle::isOFF() {
-  return out & 0b00000001;
+bool Toggle::isOFF(uint8_t bit) {
+  //return out & 0b00000001;
+  return out & (1 << bit);
 }
 
-bool Toggle::isON() {
-  return !(out & 0b00000001);
+bool Toggle::isON(uint8_t bit) {
+  //return !(out & 0b00000001);
+  return !(out & (1 << bit));
 }
 
-bool Toggle::OFFtoON() {
-  if ((pOut & 0b00000001) && !(out & 0b00000001)) {
+bool Toggle::OFFtoON(uint8_t bit) {
+  if ((pOut & (1 << bit)) && !(out & (1 << bit))) {
     pOut = out;
     return true;
   }
   return false;
 }
 
-bool Toggle::ONtoOFF() {
-  if (!(pOut & 0b00000001) && (out & 0b00000001)) {
+bool Toggle::ONtoOFF(uint8_t bit) {
+  if (!(pOut & (1 << bit)) && (out & (1 << bit))) {
     pOut = out;
     return true;
   }
@@ -135,7 +141,7 @@ void Toggle::init() {
       else if (_inputMode == inMode::input_pulldown) pinMode(_inB, INPUT_PULLDOWN);
 #endif
     }
-    if (_inputMode == inMode::input_port) {
+    if (_inputMode == inMode::input_bit || _inputMode == inMode::input_port) {
       _inA = 0;
       _inB = 0;
     } else {
