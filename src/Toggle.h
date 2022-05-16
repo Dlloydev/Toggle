@@ -29,17 +29,21 @@ class Toggle {
     void setInputMode(inMode inputMode);
     void setInvertMode(bool invert);
     void setSampleUs(uint16_t sampleUs);
+    uint8_t setAlgorithm(uint8_t glitches = 2);
     uint8_t debounceInput(uint8_t bit = 0);
+    uint8_t samples();
 
   private:
     void init();
 
-    inMode _inputMode = inMode::input_pullup;
-    uint8_t _inA, _inB, dat, pDat, ppDat;
-    uint8_t *_in;
-    uint8_t states = 0b10000000, out = 0xFF, pOut = 0xFF;
-    uint16_t _sampleUs = 5000;
-    uint32_t lastUs;
+    inMode _inputMode = inMode::input_pullup;  // input mode
+    uint8_t _inA, _inB;                        // arduino input pin
+    uint8_t *_in;                              // referenced to input variable
+    uint8_t dat, pDat, ppDat;                  // current, previous and 2nd previos input data
+    uint16_t _sampleUs = 5000;                 // sample period μs
+    uint32_t lastUs;                           // last sample μs
+    uint8_t out = 0xFF, pOut = 0xFF;           // debounced output and previous debounced output
+    uint8_t csr = 0b10101010;                  // B7-B4: samples B3: first run, B2: invert, B1-B0 algorithm
 
 };
 #endif

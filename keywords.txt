@@ -40,6 +40,8 @@ setInputMode	KEYWORD2
 setInvertMode	KEYWORD2
 setSampleUs	KEYWORD2
 debounceInput	KEYWORD2
+setAlgorithm	KEYWORD2
+samples	KEYWORD2
 
 ##########################################
 # Constants (LITERAL1)

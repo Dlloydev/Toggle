@@ -21,7 +21,7 @@ void setup() {
   while (!Serial) { }; // Leonardo
   Serial.begin(115200);
   myInput.setInputMode(myInput.inMode::input_port); // debounce all bits
-  myInput.setSampleUs(20); // sample ASAP
+  myInput.setSampleUs(20);
 }
 
 void loop() {

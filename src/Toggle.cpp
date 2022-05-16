@@ -1,5 +1,5 @@
 /************************************************
-   Toggle Library for Arduino - Version 2.5.2
+   Toggle Library for Arduino - Version 2.5.3
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ************************************************/
@@ -21,27 +21,51 @@ void Toggle::poll(uint8_t bit) {
       if (_inB) dat += digitalRead(_inB) * 2;
     }
     if (_inputMode == inMode::input_bit || _inputMode == inMode::input_port) dat = *_in;
-    if (states & 0b01000000) dat = ~dat; //bitwise not
+    if (csr & 0b00000100) dat = ~dat; // if invert mode
     if (bit > 7) bit = 0;
     debounceInput(bit);
-  } //run sample
-} //poll
-/*
-  The debounceInput() function uses a robust algorithm that removes spurious
-  signal transitions and only adds 2 sample periods time lag to the output
-  signal. A 3-sample stable period is required for an output bit to change.
-  Each output bit is set after 3 consecutive 1's are detected and cleared
-  after 3 consecutive 0's are detected.
-*/
+    if ((csr & 0xF0) < 0xA0) csr += 0x10; // if samples < 10, samples++;
+  } // run sample
+} // poll
 
+uint8_t Toggle::setAlgorithm(uint8_t glitches) {
+  csr |=  0b00000010;    // 2 glitches ignored (default)
+  csr &= ~0b00000001;
+  if (glitches == 1) {  // 1 glitch ignored
+    csr |=  0b00000001;
+    csr &= ~0b00000010;
+  }
+  else if (glitches == 0) csr &= ~0b00000011;  // 0 glitches ignored
+  return csr;
+}
+
+/*
+  The debounceInput() function by default uses a robust algorithm that removes several spurious
+  signal transitions a(glitches) nd only adds 2 sample periods time lag to the output signal.
+  A 3-sample stable period is required for an output bit to change. Optionally, this can be
+  changed to 1 glitch removal with 1 sample period time lag or to immediate response mode.
+*/
 uint8_t Toggle::debounceInput(uint8_t bit) {
   pOut = out;
   uint8_t bits = 2;
   if (_inputMode == inMode::input_bit) bits = 1;
   if (_inputMode == inMode::input_port) bits = 8;
   for (int i = bit; i < bit + bits; i++) {
-    if (dat & (1 << i) && pDat & (1 << i) && ppDat & (1 << i)) out |= (1 << i);
-    else if (!(dat & 1 << i) && !(pDat & 1 << i) && !(ppDat & 1 << i)) out &= ~(1 << i);
+
+    if (csr & 0b00000010) { // 2 glitches ignored
+      if (dat & (1 << i) && pDat & (1 << i) && ppDat & (1 << i)) out |= (1 << i);
+      else if (!(dat & 1 << i) && !(pDat & 1 << i) && !(ppDat & 1 << i)) out &= ~(1 << i);
+
+    } else if (csr & 0b00000001) { // 1 glitch ignored
+      if (dat & (1 << i) && pDat & (1 << i)) out |= (1 << i);
+      else if (!(dat & 1 << i) && !(pDat & 1 << i)) out &= ~(1 << i);
+
+    } else { // immediate ON response, delayed OFF
+      if ((csr & 0xF0) == 0xA0) { // if samples == 10
+        if (dat & (1 << i)) out |= (1 << i);
+        else if (!(dat & 1 << i)) out &= ~(1 << i);
+      }
+    }
   }
   ppDat = pDat;
   pDat = dat;
@@ -49,41 +73,44 @@ uint8_t Toggle::debounceInput(uint8_t bit) {
 }
 
 bool Toggle::isOFF(uint8_t bit) {
-  //return out & 0b00000001;
   return out & (1 << bit);
 }
 
 bool Toggle::isON(uint8_t bit) {
-  //return !(out & 0b00000001);
-  return !(out & (1 << bit));
+  return !isOFF(bit);
 }
 
 bool Toggle::OFFtoON(uint8_t bit) {
-  if ((pOut & (1 << bit)) && !(out & (1 << bit))) {
-    pOut = out;
-    return true;
-  }
+  if ((pOut & (1 << bit)) && !isOFF(bit)) {
+    if ((csr & 3) == 0 && (csr & 0xF0) == 0xA0) csr &= ~0xF0; // samples = 0;
+      pOut = out;
+      return true;
+    }
   return false;
 }
 
 bool Toggle::ONtoOFF(uint8_t bit) {
-  if (!(pOut & (1 << bit)) && (out & (1 << bit))) {
-    pOut = out;
-    return true;
-  }
+  if ((!(pOut & (1 << bit))) && isOFF(bit)) {
+    if ((csr & 3) == 0 && (csr & 0xF0) == 0xA0) csr &= ~0xF0; // samples = 0;
+      pOut = out;
+      return true;
+    }
   return false;
+}
+
+uint8_t Toggle::samples() {
+  return csr >> 4;
 }
 
 bool Toggle::isUP() {
   return isON();
 }
 
-bool Toggle::isMID() {
-  return (out & 0b00000001) && (out & 0b00000010);
-}
-
 bool Toggle::isDN() {
   return !(out & 0b00000010);
+}
+bool Toggle::isMID() {
+  return isOFF() && !isDN();
 }
 
 bool Toggle::UPtoMID() {
@@ -95,7 +122,7 @@ bool Toggle::MIDtoUP() {
 }
 
 bool Toggle::MIDtoDN() {
-  if ((pOut & 0b00000010) && !(out & 0b00000010)) {
+  if ((pOut & 0b00000010) && isDN()) {
     pOut = out;
     return true;
   }
@@ -103,7 +130,7 @@ bool Toggle::MIDtoDN() {
 }
 
 bool Toggle::DNtoMID() {
-  if (!(pOut & 0b00000010) && (out & 0b00000010)) {
+  if (!(pOut & 0b00000010) && !isDN()) {
     pOut = out;
     return true;
   }
@@ -115,8 +142,8 @@ void Toggle::setInputMode(inMode inputMode) {
 }
 
 void Toggle::setInvertMode(bool invert) {
-  if (invert)states |= 0b01000000;
-  else states &= 0b10111111;
+  if (invert)csr |= 0b00000100; //set
+  else csr &= ~0b00000100; //clear
 }
 
 void Toggle::setSampleUs(uint16_t sampleUs) {
@@ -124,8 +151,8 @@ void Toggle::setSampleUs(uint16_t sampleUs) {
 }
 
 void Toggle::init() {
-  if (states & 0b10000000) { //first run
-    states &= 0b01111111; //clear first run
+  if (csr & 0b00001000) { // first run
+    csr &= ~0b00001000; // clear first run
     lastUs = micros();
     if (_inA) {
       if (_inputMode == inMode::input_pullup) pinMode(_inA, INPUT_PULLUP);

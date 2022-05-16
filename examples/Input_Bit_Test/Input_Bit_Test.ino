@@ -25,7 +25,8 @@ void setup() {
   Serial.begin(115200);
 
   myInput.setInputMode(myInput.inMode::input_port);
-  myInput.setSampleUs(20); // sample ASAP
+  myInput.setSampleUs(20);
+  myInput.setAlgorithm(2);
 
   for (int i = 0; i < 47; i++) {
     Input = dat[i] << bit;
