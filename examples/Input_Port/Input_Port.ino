@@ -21,17 +21,17 @@ void setup() {
   while (!Serial) { }; // Leonardo
   Serial.begin(115200);
   myInput.setInputMode(myInput.inMode::input_port); // debounce all bits
-  myInput.setSampleUs(20);
+  myInput.setSamplePeriodUs(20); // 0-65535μs
 }
 
 void loop() {
   myInput.poll();
-  if (myInput.OFFtoON(bit)) {
+  if (myInput.onPress()) {
     Serial.print(F("b")); Serial.print(bit); Serial.println(F(": OFF⇒ON"));
     ledState = !ledState;
     digitalWrite(ledPin, ledState);
   }
-  if (myInput.ONtoOFF(bit)) {
+  if (myInput.onRelease()) {
     Serial.print(F("b")); Serial.print(bit); Serial.println(F(": ON⇒OFF"));
   }
 }

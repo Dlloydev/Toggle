@@ -25,8 +25,8 @@ void setup() {
   Serial.begin(115200);
 
   myInput.setInputMode(myInput.inMode::input_port);
-  myInput.setSampleUs(20);
-  myInput.setAlgorithm(2);
+  myInput.setAlgorithm(2); // ignore(2), (1) or (0) glitches for robust, normal and quick response
+  myInput.setSamplePeriodUs(20); // 0-65535μs
 
   for (int i = 0; i < 47; i++) {
     Input = dat[i] << bit;
@@ -34,10 +34,10 @@ void setup() {
 
     for (int i = 0; i < 10; i++) { // zoom horizontal
       plot("In", Input + 8, false);
-      plot("isOFF", myInput.isOFF(bit) + 6, false);
-      plot("OFF2ON", myInput.OFFtoON(bit) + 4, false);
-      plot("ON2OFF", myInput.ONtoOFF(bit) + 2, false);
-      plot("isON", myInput.isON(bit), true);
+      plot("isOFF", myInput.isReleased(bit) + 6, false);
+      plot("OFF2ON", myInput.onPress() + 4, false);
+      plot("ON2OFF", myInput.onRelease() + 2, false);
+      plot("isON", myInput.isPressed(bit), true);
     }
   }
 }

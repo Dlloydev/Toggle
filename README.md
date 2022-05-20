@@ -6,109 +6,9 @@
 
 ### Flexible Inputs
 
-The inputs can be from a single pin or several pins allowing the use of 2 or 3-position switches and up to seven debounced states. When linking to a data (byte) input, the debouncer can work with any selected bit or it can debounce all 8-bits in one Toggle instance. 
+The inputs can be from a single pin or several pins allowing the use of 2 or 3-position switches and up to seven debounced states. When linking to a data (byte) input, the debouncer can work with any selected bit or it can debounce all 8-bits in one Toggle instance. This method can be used for debouncing serial data from I/O expanders, sensors or stored values.  Examples:  [`Input_Bit_Test.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Bit_Test/Input_Bit_Test.ino) , [`Input_Bit.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Bit/Input_Bit.ino),  [`Input_Port_Test.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Port_Test/Input_Port_Test.ino) and [`Input_Port.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Port/Input_Port.ino).
 
-The pin configuration is done in `poll()` function"s first run in the loop. Input pullup is default, but this can be changed to input or input pulldown (ESP32). 
-
-### Robust Debouncer Algorithm
-
-The algorithm has three options. Robust Mode (default) ignores 2 glitches, Normal Response Mode (ignores 1 glitch) and Quick Response Mode for time critical requirements, but susceptible to spurious transitions.
-
-### Flexible Sampling
-
-Rather than use a basic timer strategy, the Toggle library uses sampling and only requires up to three samples on the input to to provide a clean (debounced) output. The sample period defaults to 5000μs (5ms) which works well the default Robust Mode. With these defaults, only 15ms is required for detecting a button switch being pressed or released. This may seem low when thinking of regular debouncig, but in order for this method to falsely detect a transition, it would require that there be a gap of greater than 15ms **between bounces**.
-
-From *[A Guide to Debouncing](http://www.ganssle.com/item/debouncing-switches-contacts-code.htm)*, (Anatomy of a Bounce):
-
-> *Consider switch E again, that one with the pretty face that hides a  vicious 157 msec bouncing heart. One test showed the switch going to a  solid one for 81 msec, after which it dropped to a perfect zero for 42  msec before finally assuming its correct high state. Think what that  would do to pretty much any debounce code!* 
-
-Using the Toggle library, this switch could be reliably debounced using a 15ms sample period. In Robust Mode, this would require  a dropout of 45ms or more to cause a false detection.
-
-### Debouncing Input Values
-
-To bypass Arduino's pin functions and link to input data values directly, use `input_bit` mode for debouncing only bit0 or use`input_port` mode (8-bit debouncing) for I/O expanders, sensor data or stored data.  For examples, see  `Input_Bit_Test.ino` and `Input_Port_Test.ino`
-
-![image](https://user-images.githubusercontent.com/63488701/167769114-92fcdfe5-1408-48d5-aeaa-efef8b3d4495.png)
-
-### Debouncing Buttons and Switches:
-
-#### ![image](https://user-images.githubusercontent.com/63488701/168192044-6dffe0f5-da86-4546-8eca-711f89f1ca70.png)
-
-## Using Toggle
-
-Simple to use because pinMode, input pullups and sample period for de-glitching and debouncing are automatically configured.
-
-Declaring a switch, button or data using 1 digital pin input:
-
-```c++
-Toggle sw1(6); // GPIO 6
-```
-
-Declaring a switch or button using 2 digital pins for SP3T contacts:
-
-```c++
-Toggle sw2(7, 8); // GPIO 7 and 8
-```
-
-Each switch is polled  in the `loop()` function:
-
-```c++
-sw1.poll();
-sw2.poll();
-```
-
-#### The switch functions when using 1 input pin:
-
-```c++
-// when using input_port mode you can select any bit i.e. isOFF(3); for bit3
-bool isOFF();
-bool isON();
-bool OFFtoON();
-bool ONtoOFF();
-```
-
-The switch has 2 positions referred to as OFF (input is high) and ON (input is low). The first 2 functions will continuously return true if the switch is at that current position. The last 2 functions return true (once only) if the switch has just transitioned to the checked position. This is very handy to execute code based on direction of switched operation or for any one-shot processing of code.
-
-#### The switch functions when using 2 input pins:
-
-```c++
-bool isUP();
-bool isMID();
-bool isDN();
-bool UPtoMID();
-bool MIDtoDN();
-bool DNtoMID();
-bool MIDtoUP();
-```
-
-The switch has 3 positions referred to as UP, MID (center) and DN (down). The first 3 functions will continuously return true if the switch is at that position. The last 4 functions return true (once only) if the switch has just transitioned to that position. This is very handy to execute code based on direction of switched operation or for any one-shot processing of code.
-
-#### Other functions:
-
-```c++
-void setInputMode(inMode inputMode);
-// options:
-sw1.setInputMode(sw1.inMode::input_input);     // high impedance input
-sw1.setInputMode(sw1.inMode::input_pullup);    // pullup resistor enabled (default)
-sw1.setInputMode(sw1.inMode::input_pulldown);  // pulldown resistor enabled (ESP32) 
-sw1.setInputMode(sw1.inMode::input_port);      // uses a byte variable for input data
-
-void setInputMode(inMode inputMode);
-void setInvertMode(bool invert);               // set true if button pulls signal high when pressed
-void setSampleUs(uint16_t sampleUs);           // default sample period is 5000μs, range is 0-65535μs
-uint8_t setAlgorithm(uint8_t glitches = 2);    // Robust, Normal or Quick response, returns csr value
-uint8_t debounceInput(uint8_t bit = 0);        // returns debounced output
-```
-
-#### Set Algorithm
-
-```c++
-setAlgorithm(2);   // Robust Mode, 2 glitches ignored
-setAlgorithm(1);   // Normal Mode, 1 glitch ignored
-setAlgorithm(0);   // Quick Mode, can respond to spurious transitions
-```
-
-In Robust Mode, the algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared. From the `Input_Port_Test.ino` example, the following is the serial printout with leading 0's added:
+From the `Input_Port_Test.ino` example, this is the serial output with leading 0's added:
 
 ```c++
 In: 00000000 Out: 00000000
@@ -129,6 +29,24 @@ In: 00000000 Out: 01000000
 ```
 
 Looking at the columns (bit data) top to bottom, it can be seen that the debounced `Out` data lags by only 2 samples (rows). It also can be seen that the input debouncer can tolerate a very noisy signal with up to 2 consecutive 1's or 0's that are anomalous or spurious in the `In` data.
+
+### Algorithms
+
+```c++
+setAlgorithm(2);                               // Robust Mode, 2 glitches ignored
+setAlgorithm(1);                               // Normal Mode, 1 glitch ignored
+setAlgorithm(0);                               // Quick Mode, responds to spurious transitions
+```
+
+In Robust Mode, the algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared. 
+
+### Sampling
+
+Rather than use a basic timer strategy, the Toggle library uses sampling and only requires up to three samples on the input to to provide a clean (debounced) output. The sample period defaults to 5000μs (5ms) which works well the default Robust Mode. With these defaults, only 15ms is required for detecting a button switch being pressed or released. This may seem low when thinking of regular debouncig, but in order for this method to falsely detect a transition, it would require that there be a gap of greater than 15ms between bounces. From *[A Guide to Debouncing](http://www.ganssle.com/item/debouncing-switches-contacts-code.htm)*, (Anatomy of a Bounce):
+
+> *Consider switch E again, that one with the pretty face that hides a  vicious 157 msec bouncing heart. One test showed the switch going to a  solid one for 81 msec, after which it dropped to a perfect zero for 42  msec before finally assuming its correct high state. Think what that  would do to pretty much any debounce code!* 
+
+Using the Toggle library, this switch could be debounced with a 15ms sample period and ignoring dropouts of up to 45ms.
 
 ## Switch Connections
 
@@ -166,40 +84,412 @@ A set of connections are shown where 0.1μF capacitors are optionally added. Thi
 
 ![image](https://user-images.githubusercontent.com/63488701/166517355-0869726d-dca0-4125-bb3e-2bebe63f6afb.png)
 
+#### The switch functions when using 2 input pins:
+
+```
+isUP();
+isMID();
+isDN();
+UPtoMID();
+MIDtoDN();
+DNtoMID();
+MIDtoUP();
+```
+
+The switch has 3 positions referred to as UP, MID (center) and DN (down). The first 3 functions will continuously return true if the switch is at that position. The last 4 functions return true (once only) if the switch has just transitioned to that position.
 
 
-#### Rocker Switch (SP3T, On-Off-On):
 
-![image](https://user-images.githubusercontent.com/63488701/166518133-6c991e99-1618-404b-b9b4-62c0c0f79dae.png)
+## Toggle Library Reference
+
+To use this library
+
+```c++
+#include <Toggle.h>
+```
 
 
 
-#### Polling
+## Constructors
 
-The switch inputs are polled in the main loop and the default sample rate is 5000μs (5ms).
+```c++
+Toggle();           // default constructor
+Toggle(inA);
+Toggle(inA, inB);
+Toggle(*in);
+```
 
-#### Deglitching
+##### Description
 
-Toggle uses a robust debouncer algorithm that ignores up to several consecutive spikes or dropouts.
+The constructor defines a button object. If the default constructor is used when declaring an array of pointers to button objects,        then it must be followed by a call to begin in setup. Otherwise, begin() is automatically called and not needed in setup.
 
-#### Debouncing
+##### Syntax
 
-The debouncer algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared.
+`Toggle(inA);`  <u>or</u>  `Toggle(inA, inB);`  <u>or</u>  `Toggle(*in);`
 
-#### Memory Comparison on Leonardo :
+##### Required parameter
 
-| Library      | Version   | Buttons                    | Bytes   | Bytes Used |
-| ------------ | --------- | -------------------------- | ------- | ---------- |
-| Empty sketch | --        | 2                          | 149     | --         |
-| **Toggle.h** | **2.5.3** | **2**                      | **185** | **36**     |
-| JC_Button.h  | 2.1.2     | 2                          | 186     | 37         |
-| Bounce2.h    | 2.71.0    | 2                          | 193     | 44         |
-| **Toggle.h** | **2.5.3** | **8**                      | **197** | **48**     |
-| **Toggle.h** | **2.5.3** | **64**  (8 ports x 8-bits) | **197** | **48**     |
-| AceButton.h  | 1.9.2     | 2                          | 205     | 56         |
-| ezButton.h   | 1.0.3     | 2                          | 331     | 182        |
+**inA:** Arduino pin number that the button or switch is connected to *(byte)* , <u>or</u>
+***in:** Arduino variable representing the input signal *(byte)*
+
+##### Optional parameters
+
+**inB:** Second Arduino pin number *(byte)*. Use 2 inputs when connecting to 3 position switches.
+
+##### Returns
+
+None.
+
+##### Example
+
+```c++
+// a button or switch is connected from pin 2 to ground
+// 5ms sample interval (default)
+// pullup enabled (default)
+// inverted = false (default)
+// algorithm = 2 glitches "Robust Mode" (default)
+Toggle myInput(2);
+
+// same as above, but a 3 position switch is connected to pins 2 and 3
+Toggle myInput(2, 3);
+
+// a byte variable is linked to the Toggle object, defaults are same as above
+Toggle myInput(*Input);
+```
+
+
+
+## poll()
+
+##### Description
+
+This function is placed at the top of the loop. Initializes the Button object and the pin it is connected to.
+
+##### Syntax
+
+`myInput.poll();`
+
+##### Parameters
+
+None.
+
+##### Returns
+
+None.
+
+
+
+## Primary Functions
+
+There are 5 primary functions when using 1 input pin or data bit. Shown below is a plot showing the returned values that are verically offset for clarity. Here, the algorithm was set to 0 glitches. In this case, the debounce interval is hard coded to 10 sample periods. The response is near instant "press" detection and delayed "release" detection which is similar to how most common debouncers operate:
+
+![image](https://user-images.githubusercontent.com/63488701/169307791-e4b02e03-4399-4984-87a2-755dafaf3f47.png)
+
+
+
+## onChange()
+
+##### Description
+
+This function checks the status register to see if the button or switch has changed state and reports whether the onPress or onRelease flag has been set. Calling onChange() does not modify the status register.
+
+##### Syntax
+
+`myInput.onChange();`
+
+##### Parameters
+
+None.
+
+##### Returns
+
+no change (0) , onPress (1), onRelease (2) *(byte)*
+
+##### Example
+
+```c++
+if (myInput.onChange() == 2) {
+	// button was released
+} else if (myInput.onChange() == 1) {
+  // button was pressed
+} else {
+  // no change
+}
+```
+
+
+
+## onPress()
+
+## onRelease()
+
+##### Description
+
+These functions check the the status register to see if the button or switch has set the onPress or onRelease flag. These functions will return the flag status and clear the respective flag.
+
+##### Syntax
+
+`myInput.onPress();`  
+
+`myInput.onRelease();`
+
+##### Parameters
+
+None.
+
+##### Returns
+
+*true* or *false*, *(bool)*
+
+##### Example 1
+
+```c++
+if (myInput.onPress())
+{
+	//do something (true only once per press)
+}
+```
+
+ 
+
+## isPressed()
+
+## isReleased()
+
+##### Description
+
+These functions checks the curent debounced output and its history to see if the button or switch is pressed or released.
+
+##### Syntax
+
+`myInput.isPressed();`  
+
+`myInput.isReleased();`
+
+##### Optional parameter
+
+**bit:** selects the bit number from an input data *(byte)*
+
+##### Returns
+
+*true* or *false*, *(bool)*
+
+##### Example
+
+```c++
+if (myButton.isPressed())
+{
+	//do something
+}
+else
+{
+	//do something else
+}
+```
+
+
+
+## toggle()
+
+##### Description
+
+This function will toggle the return value after each state change. Useful to easily toggle an LED responding to every state change.
+
+##### Syntax
+
+`myInput.toggle(invert);` 
+
+##### Parameters
+
+**invert:** can be used to invert the initial toggle state *(bool)*
+
+##### Returns
+
+*true* or *false*, toggles after any state change. *(bool)
+
+
+
+## Timer Functions
+
+There are 4 timer functions to make timing operations simple to use in your code.
+
+
+
+## blink(ms)
+
+##### Description
+
+This function sets the duration in milliseconds that the returned value is true after each state change. Useful to blink an LED to indicate every state change.
+
+##### Syntax
+
+`myInput.blink(ms);` 
+
+##### Parameters
+
+**ms:** The number of milliseconds *(unsigned int)*
+
+##### Returns
+
+*true* or *false*, depending on whether the elapsed time has expired after any state change. *(bool)*
+
+##### Example
+
+```c++
+digitalWrite(ledPin, blink(100)); // blink an LED for 100ms just after each state change
+```
+
+ 
+
+## pressedFor(ms)
+
+## releasedFor(ms)
+
+##### Description
+
+These functions check the the status register to see if the button or switch has set the pressedFor or releasedFor flag. These functions will return the flag status and clear the respective flag.
+
+##### Syntax
+
+`myInput.pressedFor(ms);`  
+`myInput.releasedFor(ms);`
+
+##### Parameters
+
+**ms:** The number of milliseconds *(unsigned int)*
+
+##### Returns
+
+*true* or *false*, depending on whether the elapsed time has expired after the state change. *(bool)*
+
+##### Example
+
+```c++
+if (myInput.pressedFor(500))
+{
+    // true (once only) if button has been pressed for 500ms
+}
+```
+
+ 
+
+## retrigger(ms)
+
+##### Description
+
+This function checks the duration in milliseconds that the  button or switch is pressed  and returns true (once only) each time the given millisecond duration has expired.
+
+##### Syntax
+
+`myInput.retrigger(ms);` 
+
+##### Parameters
+
+**ms:** The number of milliseconds *(unsigned int)*
+
+##### Returns
+
+*true* or *false*, returns true (once only) each time the given ms duration has expired while the button is pressed. *(bool)*
+
+##### Example
+
+```c++
+if (retrigger(500))
+{
+// count every 500ms interval while the button is being pressed   
+} 
+```
+
+ 
+
+## Set Functions
+
+
+
+## setInputMode()
+
+##### Description
+
+This function sets the various options for the input source. 
+
+##### Syntax
+
+`myInput.inMode::input_option;` 
+
+##### Returns
+
+None.
+
+##### Options
+
+```c++
+myInput.setInputMode(sw1.inMode::input_input);     // high impedance input
+myInput.setInputMode(sw1.inMode::input_pullup);    // pullup resistor enabled (default)
+myInput.setInputMode(sw1.inMode::input_pulldown);  // pulldown resistor enabled (ESP32) 
+myInput.setInputMode(sw1.inMode::input_bit);       // input byte (bit0)
+myInput.setInputMode(sw1.inMode::input_port);      // input byte (8-bit)
+```
+
+ 
+
+## setInvertMode()
+
+##### Description
+
+Set true if the button or switch pulls the signal high when pressed. Default is false (button or switch pulls the signal low when pressed).
+
+##### Syntax
+
+`myInput.setInvertMode(true);` 
+
+##### Returns
+
+None.
+
+
+
+## setSampleUs()
+
+##### Description
+
+Sets the sample period in microseconds. Default is 5000μs.
+
+##### Syntax
+
+`myInput.setSampleUs(us);` 
+
+##### Returns
+
+None.
+
+
+
+## setAlgorithm()
+
+##### Description
+
+Sets the debouncer algorithm to one of three modes.
+
+- **Robust Mode (2):** This is the default mode where up to 2 spurious signal transitions (glitches) are ignored. This adds 2 sample periods time lag to the output signal.
+- **Normal Response (1):** This is mode ignores up to 1 spurious signal transition (glitch) and adds 1 sample period time lag to the output signal.
+- **Quick Response (0):** This is mode is similar to most debouncers where the response is near instant to a button or switch press, and the release won't be recognized until a debounce time period has expired. In this case, the debounce time period is calculated and set at 10 times the sample period.
+
+##### Syntax
+
+`myInput.setAlgorithm(2);` 
+
+##### Returns
+
+Control and Status Register (csr) value *(byte)*.
+
+
+
+---
+
+
 
 ### References
 
 - [A Guide To Debouncing](http://www.ganssle.com/item/debouncing-switches-contacts-code.htm)
 - [Wetting Current](https://en.wikipedia.org/wiki/Wetting_current)
+

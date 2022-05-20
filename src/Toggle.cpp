@@ -1,5 +1,5 @@
 /************************************************
-   Toggle Library for Arduino - Version 2.5.3
+   Toggle Library for Arduino - Version 3.0.0
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ************************************************/
@@ -7,15 +7,34 @@
 #include "Toggle.h"
 #include <Arduino.h>
 
-Toggle::Toggle() { }
-Toggle::Toggle(uint8_t inA) : _inA(inA) { }
-Toggle::Toggle(uint8_t inA, uint8_t inB) : _inA(inA), _inB(inB) { }
-Toggle::Toggle(uint8_t *in) : _in(in) { }
+Toggle::Toggle() : _inA(255), _inB(255) {}
+Toggle::Toggle(uint8_t *in) : _in(in) {}
+
+void Toggle::begin(uint8_t inA, uint8_t inB) {
+  _inA = inA;
+  _inB = inB;
+  sampleUs = micros();
+  if (_inA != 255) {
+    if (_inputMode == inMode::input_pullup) pinMode(_inA, INPUT_PULLUP);
+    else if (_inputMode == inMode::input) pinMode(_inA, INPUT);
+#if (defined(ESP32) || defined(ARDUINO_ARCH_ESP32))
+    else if (_inputMode == inMode::input_pulldown) pinMode(_inA, INPUT_PULLDOWN);
+#endif
+  }
+  if (_inB != 255) {
+    if (_inputMode == inMode::input_pullup) pinMode(_inB, INPUT_PULLUP);
+    else if (_inputMode == inMode::input) pinMode(_inB, INPUT);
+#if (defined(ESP32) || defined(ARDUINO_ARCH_ESP32))
+    else if (_inputMode == inMode::input_pulldown) pinMode(_inB, INPUT_PULLDOWN);
+#endif
+  }
+}
 
 void Toggle::poll(uint8_t bit) {
-  init();
-  if (micros() - lastUs > _sampleUs) {
-    lastUs += _sampleUs;
+  //  begin();
+  if (micros() - sampleUs > _samplePeriodUs) {
+    sampleUs += _samplePeriodUs;
+    sampleCount++;
     if (_inputMode == inMode::input || _inputMode == inMode::input_pullup || _inputMode == inMode::input_pulldown) {
       if (_inA) dat = digitalRead(_inA);
       if (_inB) dat += digitalRead(_inB) * 2;
@@ -24,7 +43,7 @@ void Toggle::poll(uint8_t bit) {
     if (csr & 0b00000100) dat = ~dat; // if invert mode
     if (bit > 7) bit = 0;
     debounceInput(bit);
-    if ((csr & 0xF0) < 0xA0) csr += 0x10; // if samples < 10, samples++;
+    if ((csr & 0xF0) < 0xA0) csr += 0x10; // increment debounceCount (10 max)
   } // run sample
 } // poll
 
@@ -39,32 +58,45 @@ uint8_t Toggle::setAlgorithm(uint8_t glitches) {
   return csr;
 }
 
-/*
-  The debounceInput() function by default uses a robust algorithm that removes several spurious
-  signal transitions a(glitches) nd only adds 2 sample periods time lag to the output signal.
-  A 3-sample stable period is required for an output bit to change. Optionally, this can be
-  changed to 1 glitch removal with 1 sample period time lag or to immediate response mode.
-*/
+// The debounceInput() function by default uses a robust algorithm that ignores up to 2 spurious
+// signal transitions (glitches) and only adds up to 2 sample periods time lag to the output signal.
+// Optionally, this can be changed to 1 glitch with 1 sample lag or to immediate response mode.
+
 uint8_t Toggle::debounceInput(uint8_t bit) {
   pOut = out;
-  uint8_t bits = 2;
+  uint8_t a, b, c, bits = 2;
   if (_inputMode == inMode::input_bit) bits = 1;
   if (_inputMode == inMode::input_port) bits = 8;
+
   for (int i = bit; i < bit + bits; i++) {
+    a = dat & (1 << i);
+    b = pDat & (1 << i);
+    c = ppDat & (1 << i);
 
     if (csr & 0b00000010) { // 2 glitches ignored
-      if (dat & (1 << i) && pDat & (1 << i) && ppDat & (1 << i)) out |= (1 << i);
-      else if (!(dat & 1 << i) && !(pDat & 1 << i) && !(ppDat & 1 << i)) out &= ~(1 << i);
+      if (a && b && c) out |= (1 << i);
+      else if (!a && !b && !c) out &= ~(1 << i);
 
     } else if (csr & 0b00000001) { // 1 glitch ignored
-      if (dat & (1 << i) && pDat & (1 << i)) out |= (1 << i);
-      else if (!(dat & 1 << i) && !(pDat & 1 << i)) out &= ~(1 << i);
+      if (a && b) out |= (1 << i);
+      else if (!a && !b) out &= ~(1 << i);
 
     } else { // immediate ON response, delayed OFF
       if ((csr & 0xF0) == 0xA0) { // if samples == 10
-        if (dat & (1 << i)) out |= (1 << i);
-        else if (!(dat & 1 << i)) out &= ~(1 << i);
+        if (a) out |= (1 << i);
+        else if (!a) out &= ~(1 << i);
       }
+    }
+  }
+  if ((pOut & (1 << bit)) && !isReleased(bit)) {
+    lsr |=  0b00000001; // set onPress
+    lsr &= ~0b00000010; // clear onRelease
+    sampleCount = 0;
+  } else {
+    if ((!(pOut & (1 << bit))) && isReleased(bit)) {
+      lsr |=  0b00000010; // set onRelease
+      lsr &= ~0b00000001; // clear onPress
+      sampleCount = 0;
     }
   }
   ppDat = pDat;
@@ -72,53 +104,106 @@ uint8_t Toggle::debounceInput(uint8_t bit) {
   return out;
 }
 
-bool Toggle::isOFF(uint8_t bit) {
+bool Toggle::isReleased(uint8_t bit) {
   return out & (1 << bit);
 }
 
-bool Toggle::isON(uint8_t bit) {
-  return !isOFF(bit);
+bool Toggle::isPressed(uint8_t bit) {
+  return !isReleased(bit);
 }
 
-bool Toggle::OFFtoON(uint8_t bit) {
-  if ((pOut & (1 << bit)) && !isOFF(bit)) {
-    if ((csr & 3) == 0 && (csr & 0xF0) == 0xA0) csr &= ~0xF0; // samples = 0;
-      pOut = out;
-      return true;
-    }
+bool Toggle::onPress() {
+  if (lsr & 0b00000001) { // onPress
+    if ((csr & 3) == 0 && (csr & 0xF0) == 0xA0) csr &= ~0xF0; // debounceCount = 0;;
+    lsr &=  ~0b00000001; // clear onPress flag
+    pOut = out;
+    return true;
+  }
   return false;
 }
 
-bool Toggle::ONtoOFF(uint8_t bit) {
-  if ((!(pOut & (1 << bit))) && isOFF(bit)) {
-    if ((csr & 3) == 0 && (csr & 0xF0) == 0xA0) csr &= ~0xF0; // samples = 0;
-      pOut = out;
-      return true;
-    }
+bool Toggle::onRelease() {
+  if (lsr & 0b00000010) { // onRelease
+    if ((csr & 3) == 0 && (csr & 0xF0) == 0xA0) csr &= ~0xF0; // debounceCount = 0;
+    lsr &=  ~0b00000010; // clear onRelease flag
+    pOut = out;
+    return true;
+  }
   return false;
 }
 
-uint8_t Toggle::samples() {
+uint8_t Toggle::onChange() {
+  if (lsr & 0b00000010) return 2; // onRelease
+  else if (lsr & 0b00000001) return 1; // onPress
+  return 0;
+}
+
+bool Toggle::toggle(bool invert) {
+  if (onChange() == 1) {
+    if (lsr & 0b00010000) lsr &= ~0b00010000;
+    else lsr |= 0b00010000;
+  }
+ return (invert) ? !(lsr & 0b00010000) : (lsr & 0b00010000);
+}
+
+uint16_t Toggle::getElapsedMs() {
+  return sampleCount * (_samplePeriodUs >> 10);
+}
+
+bool Toggle::blink(uint16_t ms) {
+  return (bool)(ms > (getElapsedMs()));
+}
+
+bool Toggle::pressedFor(uint16_t ms) {
+  if (isPressed() && !(lsr & 0b00000100) && getElapsedMs() > ms) {
+    lsr |= 0b00000100; // set pressedFor flag
+    lsr &= ~0b00001000; // clear releasedFor flag
+    return true;
+  }
+  return false;
+}
+
+bool Toggle::releasedFor(uint16_t ms) {
+  if (isReleased() && !(lsr & 0b00001000) && getElapsedMs() > ms) {
+    lsr |=  0b00001000; // set releasedFor flag
+    lsr &= ~0b00000100; // clear pressedFor flag
+    return true;
+  }
+  return false;
+}
+
+bool Toggle::retrigger(uint16_t ms) {
+  static uint16_t nextMs;
+  if (nextMs < ms) nextMs = ms;
+  if (isPressed() && getElapsedMs() > nextMs) {
+    nextMs += ms;
+    return true;
+  }
+  if (onChange() == 2) nextMs = ms;
+  return false;
+}
+
+uint8_t Toggle::getDebounceCount() {
   return csr >> 4;
 }
 
 bool Toggle::isUP() {
-  return isON();
+  return isPressed();
 }
 
 bool Toggle::isDN() {
   return !(out & 0b00000010);
 }
 bool Toggle::isMID() {
-  return isOFF() && !isDN();
+  return isReleased() && !isDN();
 }
 
 bool Toggle::UPtoMID() {
-  return ONtoOFF();
+  return onRelease();
 }
 
 bool Toggle::MIDtoUP() {
-  return OFFtoON();
+  return onPress();
 }
 
 bool Toggle::MIDtoDN() {
@@ -146,34 +231,6 @@ void Toggle::setInvertMode(bool invert) {
   else csr &= ~0b00000100; //clear
 }
 
-void Toggle::setSampleUs(uint16_t sampleUs) {
-  _sampleUs = sampleUs;
-}
-
-void Toggle::init() {
-  if (csr & 0b00001000) { // first run
-    csr &= ~0b00001000; // clear first run
-    lastUs = micros();
-    if (_inA) {
-      if (_inputMode == inMode::input_pullup) pinMode(_inA, INPUT_PULLUP);
-      else if (_inputMode == inMode::input) pinMode(_inA, INPUT);
-#if (defined(ESP32) || defined(ARDUINO_ARCH_ESP32))
-      else if (_inputMode == inMode::input_pulldown) pinMode(_inA, INPUT_PULLDOWN);
-#endif
-    }
-    if (_inB) {
-      if (_inputMode == inMode::input_pullup) pinMode(_inB, INPUT_PULLUP);
-      else if (_inputMode == inMode::input) pinMode(_inB, INPUT);
-#if (defined(ESP32) || defined(ARDUINO_ARCH_ESP32))
-      else if (_inputMode == inMode::input_pulldown) pinMode(_inB, INPUT_PULLDOWN);
-#endif
-    }
-    if (_inputMode == inMode::input_bit || _inputMode == inMode::input_port) {
-      _inA = 0;
-      _inB = 0;
-    } else {
-      *_in = 0;
-      _in = 0;
-    }
-  }
+void Toggle::setSamplePeriodUs(uint16_t samplePeriodUs) {
+  _samplePeriodUs = samplePeriodUs;
 }

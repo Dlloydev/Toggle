@@ -24,10 +24,10 @@ void setup() {
 
 void loop() {
   sw1.poll();
-  if (sw1.OFFtoON()) {
+  if (sw1.onPress()) {
     Serial.println(F("sw1: OFF⇒ON"));
     ledState = !ledState;
     digitalWrite(ledPin, ledState);
   }
-  if (sw1.ONtoOFF()) Serial.println(F("sw1: ON⇒OFF"));
+  if (sw1.onRelease()) Serial.println(F("sw1: ON⇒OFF"));
 }
