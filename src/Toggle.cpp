@@ -1,5 +1,5 @@
 /************************************************
-   Toggle Library for Arduino - Version 3.0.0
+   Toggle Library for Arduino - Version 3.0.1
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ************************************************/
@@ -31,7 +31,10 @@ void Toggle::begin(uint8_t inA, uint8_t inB) {
 }
 
 void Toggle::poll(uint8_t bit) {
-  //  begin();
+  if (csr & 0b00001000) { // first run
+    csr &= ~0b00001000;   // clear first run
+    begin(_inA, _inB);
+  }
   if (micros() - sampleUs > _samplePeriodUs) {
     sampleUs += _samplePeriodUs;
     sampleCount++;
@@ -138,12 +141,13 @@ uint8_t Toggle::onChange() {
   return 0;
 }
 
-bool Toggle::toggle(bool invert) {
-  if (onChange() == 1) {
-    if (lsr & 0b00010000) lsr &= ~0b00010000;
-    else lsr |= 0b00010000;
+bool Toggle::toggle(bool invert, uint8_t bit) {
+  if (isPressed(bit) && !(lsr & 0b00100000)) {
+    lsr |= 0b00100000; // set lastState
+    (lsr & 0b00010000) ? lsr &= ~0b00010000 : lsr |= 0b00010000; // negate toggleFlag
   }
- return (invert) ? !(lsr & 0b00010000) : (lsr & 0b00010000);
+  if (isReleased(bit) && (lsr & 0b00100000)) lsr &= ~0b00100000; // clear lastState
+  return (invert) ? !(lsr & 0b00010000) : (lsr & 0b00010000);
 }
 
 uint16_t Toggle::getElapsedMs() {

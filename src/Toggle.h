@@ -26,7 +26,7 @@ class Toggle {
     uint16_t getElapsedMs();                         // get elapsed ms since the last state change
     uint8_t debounceInput(uint8_t bit = 0);          // the input debouncer
     uint8_t getDebounceCount();                      // counts up to 10 samples for debounce period
-    bool toggle(bool invert = false);                // returns true/false (toggle) at each state change
+    bool toggle(bool invert = false, uint8_t bit = 0); // returns true/false (toggle) at each state change
     bool isPressed(uint8_t bit = 0);                 // returns true if pressed
     bool isReleased(uint8_t bit = 0);                // returns true if released
     bool onPress();                                  // returns true if just pressed
@@ -54,8 +54,8 @@ class Toggle {
     uint16_t sampleCount;                            // sample count
     uint32_t sampleUs;                               // sample time μs
     uint8_t out = 0xFF, pOut = 0xFF;                 // debounced output and previous debounced output
-    uint8_t csr = 0b10101010;                        // B7-B4: debounceCount, B2: invert, B1-B0 algorithm
-    uint8_t lsr = 0b00000000;                        // B4 toggle, B3 releasedFor, B2 pressedFor, B1 onRelease, B0 onPress
+    uint8_t csr = 0b10100010;                        // B7-B4: debounceCount, B2: invert, B1-B0 algorithm
+    uint8_t lsr = 0b00000000;                        // B5 lastState, B4 toggle, B3 releasedFor, B2 pressedFor, B1 onRelease, B0 onPress
 
 };
 #endif

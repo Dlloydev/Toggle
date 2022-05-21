@@ -14,14 +14,15 @@ const byte ledPin = LED_BUILTIN;
 Toggle sw1(buttonPin);
 
 void setup() {
-  pinMode(ledPin, OUTPUT);
   while (!Serial) { }; // Leonardo
   Serial.begin(115200);
+  sw1.begin(buttonPin);
+  pinMode(ledPin, OUTPUT);
 }
 
 void loop() {
   sw1.poll();
-  digitalWrite(ledPin, sw1.toggle()); // call toggle() just after poll()
   if (sw1.onPress()) Serial.println(F("sw1: OFF⇒ON"));
   if (sw1.onRelease()) Serial.println(F("sw1: ON⇒OFF"));
+  digitalWrite(ledPin, sw1.toggle());
 }

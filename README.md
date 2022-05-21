@@ -121,7 +121,7 @@ Toggle(*in);
 
 ##### Description
 
-The constructor defines a button object. If the default constructor is used when declaring an array of pointers to button objects,        then it must be followed by a call to begin in setup. Otherwise, begin() is automatically called and not needed in setup.
+The constructor defines a button object. If the default constructor is used when declaring an array of pointers to button objects,        then it must be followed by a call to begin in setup.
 
 ##### Syntax
 
@@ -293,7 +293,7 @@ else
 
 ##### Description
 
-This function will toggle the return value after each state change. Useful to easily toggle an LED responding to every state change.
+This function will toggle the return value after each `onPress` state change. Useful to easily toggle an LED.
 
 ##### Syntax
 
@@ -305,7 +305,7 @@ This function will toggle the return value after each state change. Useful to ea
 
 ##### Returns
 
-*true* or *false*, toggles after any state change. *(bool)
+*true* or *false*, toggles after each `onPress` state change. *(bool)
 
 
 
