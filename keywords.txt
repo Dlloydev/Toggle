@@ -25,16 +25,25 @@ sw9	KEYWORD1
 ##########################################
 
 poll	KEYWORD2
-toggle	KEYWORD2
-blink	KEYWORD2
+setAlgorithm	KEYWORD2
+setInputMode	KEYWORD2
+setInvertMode	KEYWORD2
+setSamplePeriodUs	KEYWORD2
+setTimerMode	KEYWORD2
+getTimerMode	KEYWORD2
+clearTimer	KEYWORD2
+getElapsedMs	KEYWORD2
 isPressed	KEYWORD2
 isReleased	KEYWORD2
 onPress	KEYWORD2
 onRelease	KEYWORD2
 onChange	KEYWORD2
+toggle	KEYWORD2
+blink	KEYWORD2
 pressedFor	KEYWORD2
 releasedFor	KEYWORD2
 retrigger	KEYWORD2
+debounceInput	KEYWORD2
 isUP	KEYWORD2
 isMID	KEYWORD2
 isDN	KEYWORD2
@@ -42,13 +51,6 @@ UPtoMID	KEYWORD2
 MIDtoDN	KEYWORD2
 DNtoMID	KEYWORD2
 MIDtoUP	KEYWORD2
-setInputMode	KEYWORD2
-setInvertMode	KEYWORD2
-setSamplePeriodUs	KEYWORD2
-setAlgorithm	KEYWORD2
-debounceInput	KEYWORD2
-getDebounceCount	KEYWORD2
-getElapsedMs	KEYWORD2
 
 ##########################################
 # Constants (LITERAL1)

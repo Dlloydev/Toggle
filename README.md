@@ -33,9 +33,9 @@ Looking at the columns (bit data) top to bottom, it can be seen that the debounc
 ### Algorithms
 
 ```c++
-setAlgorithm(2);                               // Robust Mode, 2 glitches ignored
-setAlgorithm(1);                               // Normal Mode, 1 glitch ignored
-setAlgorithm(0);                               // Quick Mode, responds to spurious transitions
+setAlgorithm(2);   // Robust Mode, 2 glitches ignored
+setAlgorithm(1);   // Normal Mode, 1 glitch ignored
+setAlgorithm(0);   // Quick Mode, responds to spurious transitions
 ```
 
 In Robust Mode, the algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared. 
@@ -113,7 +113,7 @@ To use this library
 ## Constructors
 
 ```c++
-Toggle();           // default constructor
+Toggle();
 Toggle(inA);
 Toggle(inA, inB);
 Toggle(*in);
@@ -123,18 +123,14 @@ Toggle(*in);
 
 The constructor defines a button object. If the default constructor is used when declaring an array of pointers to button objects,        then it must be followed by a call to begin in setup.
 
-##### Syntax
-
-`Toggle(inA);`  <u>or</u>  `Toggle(inA, inB);`  <u>or</u>  `Toggle(*in);`
-
 ##### Required parameter
 
-**inA:** Arduino pin number that the button or switch is connected to *(byte)* , <u>or</u>
-***in:** Arduino variable representing the input signal *(byte)*
+**inA:**  Arduino pin number that the button or switch is connected to *(byte)* , <u>or</u>
+***in:**  Arduino variable representing the input signal *(byte)*
 
-##### Optional parameters
+##### Optional parameter
 
-**inB:** Second Arduino pin number *(byte)*. Use 2 inputs when connecting to 3 position switches.
+**inB:**  Second Arduino pin number *(byte)*. Use 2 inputs when connecting to 3 position switches.
 
 ##### Returns
 
@@ -143,11 +139,11 @@ None.
 ##### Example
 
 ```c++
-// a button or switch is connected from pin 2 to ground
-// 5ms sample interval (default)
-// pullup enabled (default)
-// inverted = false (default)
-// algorithm = 2 glitches "Robust Mode" (default)
+/* a button or switch is connected from pin 2 to ground
+   5000 μs sample interval (default)
+   pullup enabled (default)
+   inverted = false (default)
+   algorithm = 2 glitches "Robust Mode" (default) */
 Toggle myInput(2);
 
 // same as above, but a 3 position switch is connected to pins 2 and 3
@@ -169,9 +165,9 @@ This function is placed at the top of the loop. Initializes the Button object an
 
 `myInput.poll();`
 
-##### Parameters
+##### Optional parameter
 
-None.
+**bit:** selects the bit number from an input data *(byte)*
 
 ##### Returns
 
@@ -246,7 +242,7 @@ None.
 ```c++
 if (myInput.onPress())
 {
-	//do something (true only once per press)
+	// do something (true only once per press)
 }
 ```
 
@@ -277,13 +273,11 @@ These functions checks the curent debounced output and its history to see if the
 ##### Example
 
 ```c++
-if (myButton.isPressed())
-{
-	//do something
+if (myButton.isPressed()) {
+	// do something
 }
-else
-{
-	//do something else
+else {
+	// do something else
 }
 ```
 
@@ -319,7 +313,7 @@ There are 4 timer functions to make timing operations simple to use in your code
 
 ##### Description
 
-This function sets the duration in milliseconds that the returned value is true after each state change. Useful to blink an LED to indicate every state change.
+This function sets the duration in milliseconds that the returned value is true after the set timer mode - onPress( 0), onRelease (1), onChange (2). Useful to blink an LED.
 
 ##### Syntax
 
@@ -347,7 +341,7 @@ digitalWrite(ledPin, blink(100)); // blink an LED for 100ms just after each stat
 
 ##### Description
 
-These functions check the the status register to see if the button or switch has set the pressedFor or releasedFor flag. These functions will return the flag status and clear the respective flag.
+These functions return true if the button or switch has been in the pressedFor or releasedFor state for at least the given number of milliseconds.
 
 ##### Syntax
 
@@ -365,9 +359,8 @@ These functions check the the status register to see if the button or switch has
 ##### Example
 
 ```c++
-if (myInput.pressedFor(500))
-{
-    // true (once only) if button has been pressed for 500ms
+if (myInput.pressedFor(500)) {
+   // true (once only) if button has been pressed for 500ms
 }
 ```
 
@@ -377,7 +370,7 @@ if (myInput.pressedFor(500))
 
 ##### Description
 
-This function checks the duration in milliseconds that the  button or switch is pressed  and returns true (once only) each time the given millisecond duration has expired.
+This function checks the duration in milliseconds that the  button or switch is is in the state as selected by timer mode and returns true (once only) each time the given millisecond duration has expired.
 
 ##### Syntax
 
@@ -389,20 +382,19 @@ This function checks the duration in milliseconds that the  button or switch is 
 
 ##### Returns
 
-*true* or *false*, returns true (once only) each time the given ms duration has expired while the button is pressed. *(bool)*
+*true* or *false*, returns true (once only) each time the given ms duration has expired while the button is in the state as selected by timer mode. *(bool)*
 
 ##### Example
 
 ```c++
-if (retrigger(500))
-{
+if (retrigger(500)) {
 // count every 500ms interval while the button is being pressed   
 } 
 ```
 
  
 
-## Set Functions
+## Set and Get Functions
 
 
 
@@ -452,7 +444,7 @@ None.
 
 ##### Description
 
-Sets the sample period in microseconds. Default is 5000μs.
+Sets the sample period in microseconds. Default is 5000 μs.
 
 ##### Syntax
 
@@ -461,6 +453,54 @@ Sets the sample period in microseconds. Default is 5000μs.
 ##### Returns
 
 None.
+
+
+
+## setTimerMode()
+
+##### Description
+
+Sets the timer mode to start onPress (0), onRelease (1) or onChange (2).
+
+##### Syntax
+
+`myInput.setTimerMode(0);` 
+
+##### Returns
+
+None.
+
+
+
+## getTimerMode()
+
+##### Description
+
+Gets the timer mode to start onPress (0), onRelease (1) or onChange (2).
+
+##### Syntax
+
+`myInput.getTimerMode();` 
+
+##### Returns
+
+Timer Mode *(byte)*.
+
+
+
+## getElapsedMs(()
+
+##### Description
+
+Gets the elapsed ms since the last state change selected by timer mode.
+
+##### Syntax
+
+`myInput.getElapsedMs();` 
+
+##### Returns
+
+Elapsed milliseconds *(unsigned int)*.
 
 
 
