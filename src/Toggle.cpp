@@ -141,6 +141,7 @@ void Toggle::clearTimer() {
 }
 
 uint16_t Toggle::getElapsedMs() {
+  if ((sampleCount * (_samplePeriodUs >> 10)) > 60000) sampleCount--;
   return sampleCount * (_samplePeriodUs >> 10);
 }
 
@@ -165,6 +166,7 @@ bool Toggle::releasedFor(uint16_t ms) {
 }
 
 bool Toggle::retrigger(uint16_t ms) {
+  if (getTimerMode()) setTimerMode(0); // start onPress
   if (isPressed() && getElapsedMs() > ms) {
     clearTimer();
     return true;
