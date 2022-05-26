@@ -1,5 +1,5 @@
 /************************************************
-   Toggle Library for Arduino - Version 3.1.0
+   Toggle Library for Arduino - Version 3.1.1
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ************************************************/
@@ -167,7 +167,7 @@ uint32_t Toggle::getElapsedMs() {
   return (micros() - startUs) * 0.001;
 }
 
-uint8_t Toggle::pressCode() {
+uint8_t Toggle::pressCode(bool debug) {
   static uint8_t pCode = 0, code = 0;
   static uint32_t elapsedMs = 0;
 
@@ -179,14 +179,16 @@ uint8_t Toggle::pressCode() {
     case PB_DEFAULT:
       setTimerMode(2); // onChange
       elapsedMs = getElapsedMs();
-      if (pCode && (elapsedMs > CLICK::LONG)) _state = PB_DONE;
+      if (pCode && isReleased() && (elapsedMs > (CLICK::LONG + CLICK::MULTI))) _state = PB_DONE;
       if (onChange()) startUs = micros();
       if (onPress()) {
-        //Serial.print(F(" releasedMs: ")); Serial.print(elapsedMs); Serial.print(F("  "));
+        //Serial.print(F(" Released:\t")); Serial.print(elapsedMs); Serial.println(" ms");
         _state = PB_ON_PRESS;
       }
       if (onRelease()) {
-        //Serial.print(F(" pressedMs: ")); Serial.print(elapsedMs); Serial.print(F("  "));
+        if (debug) {
+          Serial.print(F(" Pressed:\t")); Serial.print(elapsedMs); Serial.println(" ms");
+        }
         _state = PB_ON_RELEASE;
       }
       break;
@@ -218,24 +220,26 @@ uint8_t Toggle::pressCode() {
       break;
 
     case PB_DONE:
+      if (debug) {
+        Serial.print(F(" Code:\t\t")); Serial.println(pCode, HEX); Serial.println();
+      }
       code = pCode;
       pCode = 0;
       _state = PB_DEFAULT;
-      return code;
+      if (code) return code;
       break;
 
     default:
       _state = PB_DEFAULT;
       break;
   }
-  return code;
+  return 0;
 }
 
-/************** debouncer ***********************************************************************
+/************** debouncer ************************************************************************
   The debounceInput() function by default uses a robust algorithm that ignores up to 2 spurious
   signal transitions (glitches) and only adds up to 2 sample periods time lag to the output signal.
-  Optionally, this can be changed to 1 glitch with 1 sample lag or to immediate response mode.
-*************************************************************************************************/
+**************************************************************************************************/
 uint8_t Toggle::debounceInput(uint8_t bit) {
   pOut = out;
   uint8_t a, b, c, bits = 2;

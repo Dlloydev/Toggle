@@ -19,7 +19,7 @@ class Toggle {
     void begin(uint8_t inA, uint8_t inB = 255);      // required in setup
     void poll(uint8_t bit = 0);                      // required at top of loop
 
-    uint8_t setAlgorithm(uint8_t glitches = 2);      // (2) robust mode, (1) normal response, (0) quick response
+    uint8_t setAlgorithm(uint8_t glitches = 2);      // (2) robust mode, (1) average mode, (0) common mode
     void setInputMode(inMode inputMode);             // input, input_pullup, input_pulldown, input_bit, input_port
     void setInvertMode(bool invert);                 // invert false: pullup resistors are used, invert true: pulldown resistors
     void setSamplePeriodUs(uint16_t samplePeriodUs); // sample period in microseconds
@@ -38,7 +38,7 @@ class Toggle {
     bool pressedFor(uint16_t ms);                    // returns true if pressed for at least the given ms
     bool releasedFor(uint16_t ms);                   // returns true if released for at least the given ms
     bool retrigger(uint16_t ms);                     // returns true each time the given ms expires while the button is pressed
-    uint8_t pressCode();                             // returns byte code for number of fast, short and long clicks
+    uint8_t pressCode(bool debug = 0);               // returns byte code for number of fast, short and long clicks
 
     bool isUP();                                     // functions for using 2 inputs with 3-position switches
     bool isMID();
