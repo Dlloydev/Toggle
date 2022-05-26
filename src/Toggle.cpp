@@ -1,5 +1,5 @@
 /************************************************
-   Toggle Library for Arduino - Version 3.0.2
+   Toggle Library for Arduino - Version 3.1.0
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ************************************************/
@@ -15,7 +15,8 @@ void Toggle::begin(uint8_t inA, uint8_t inB) {
     csr &= ~0b00001000;   // clear first run
     _inA = inA;
     _inB = inB;
-    sampleUs = micros();
+    us_timestamp = micros();
+    startUs = us_timestamp;
     if (_inA != 255) {
       if (_inputMode == inMode::input_pullup) pinMode(_inA, INPUT_PULLUP);
       else if (_inputMode == inMode::input) pinMode(_inA, INPUT);
@@ -35,9 +36,8 @@ void Toggle::begin(uint8_t inA, uint8_t inB) {
 
 void Toggle::poll(uint8_t bit) {
   begin(_inA, _inB); // runs one only
-  if (micros() - sampleUs > _samplePeriodUs) {
-    sampleUs += _samplePeriodUs;
-    sampleCount++;
+  if (micros() - us_timestamp > us_period) {
+    us_timestamp += us_period;
     if (_inputMode == inMode::input || _inputMode == inMode::input_pullup || _inputMode == inMode::input_pulldown) {
       if (_inA) dat = digitalRead(_inA);
       if (_inB) dat += digitalRead(_inB) * 2;
@@ -70,8 +70,8 @@ void Toggle::setInvertMode(bool invert) {
   else csr &= ~0b00000100; //clear
 }
 
-void Toggle::setSamplePeriodUs(uint16_t samplePeriodUs) {
-  _samplePeriodUs = samplePeriodUs;
+void Toggle::setSamplePeriodUs(uint16_t period) {
+  us_period = period;
 }
 
 /************* button state functions ****************/
@@ -134,17 +134,6 @@ uint8_t Toggle::getTimerMode() {
   return (lsr & 0b11000000) >> 6;
 }
 
-void Toggle::clearTimer() {
-  if (getTimerMode() == 0 && (onChange() == 1)) sampleCount = 0;       // onPress
-  else if (getTimerMode() == 1 && (onChange() == 2)) sampleCount = 0;  // onRelease
-  else if (getTimerMode() == 2 && onChange()) sampleCount = 0;         // onChange
-}
-
-uint16_t Toggle::getElapsedMs() {
-  if ((sampleCount * (_samplePeriodUs >> 10)) > 60000) sampleCount--;
-  return sampleCount * (_samplePeriodUs >> 10);
-}
-
 bool Toggle::blink(uint16_t ms) {
   return (bool)(ms > (getElapsedMs()));
 }
@@ -168,10 +157,78 @@ bool Toggle::releasedFor(uint16_t ms) {
 bool Toggle::retrigger(uint16_t ms) {
   if (getTimerMode()) setTimerMode(0); // start onPress
   if (isPressed() && getElapsedMs() > ms) {
-    clearTimer();
+    //clearTimer();
     return true;
   }
   return false;
+}
+
+uint32_t Toggle::getElapsedMs() {
+  return (micros() - startUs) * 0.001;
+}
+
+uint8_t Toggle::pressCode() {
+  static uint8_t pCode = 0, code = 0;
+  static uint32_t elapsedMs = 0;
+
+  //Serial.print(F(" startUs: ")); Serial.print(startUs); Serial.print(F("  "));
+  //Serial.print(F(" elapsedMS: ")); Serial.print(getElapsedMs()); Serial.print(F("  "));
+  //Serial.print(F(" pCode: ")); Serial.print(pCode, HEX); Serial.print(F("  "));
+
+  switch (_state) {
+    case PB_DEFAULT:
+      setTimerMode(2); // onChange
+      elapsedMs = getElapsedMs();
+      if (pCode && (elapsedMs > CLICK::LONG)) _state = PB_DONE;
+      if (onChange()) startUs = micros();
+      if (onPress()) {
+        //Serial.print(F(" releasedMs: ")); Serial.print(elapsedMs); Serial.print(F("  "));
+        _state = PB_ON_PRESS;
+      }
+      if (onRelease()) {
+        //Serial.print(F(" pressedMs: ")); Serial.print(elapsedMs); Serial.print(F("  "));
+        _state = PB_ON_RELEASE;
+      }
+      break;
+
+    case PB_ON_PRESS:
+      _state = PB_DEFAULT;
+      break;
+
+    case PB_ON_RELEASE:
+      if ((elapsedMs < CLICK::MULTI) && (!pCode || (pCode > 0xEF))) _state = PB_MULTI_CLICKS;
+      else if (elapsedMs < CLICK::LONG) _state = PB_SHORT_CLICKS;
+      else _state = PB_LONG_CLICKS;
+      break;
+
+    case PB_MULTI_CLICKS:
+      pCode |= 0xF0;
+      if ((pCode & 0x0F) < 0x0F) pCode += 1;
+      _state = PB_DEFAULT;
+      break;
+
+    case PB_SHORT_CLICKS:
+      if ((pCode & 0x0F) < 0x0F) pCode += 1;
+      _state = PB_DEFAULT;
+      break;
+
+    case PB_LONG_CLICKS:
+      if ((pCode & 0xE0) < 0xE0) pCode += 0x10;
+      _state = PB_DEFAULT;
+      break;
+
+    case PB_DONE:
+      code = pCode;
+      pCode = 0;
+      _state = PB_DEFAULT;
+      return code;
+      break;
+
+    default:
+      _state = PB_DEFAULT;
+      break;
+  }
+  return code;
 }
 
 /************** debouncer ***********************************************************************
@@ -208,12 +265,10 @@ uint8_t Toggle::debounceInput(uint8_t bit) {
   if ((pOut & (1 << bit)) && !isReleased(bit)) {
     lsr |=  0b00000001; // set onPress
     lsr &= ~0b00000010; // clear onRelease
-    clearTimer();
   } else {
     if ((!(pOut & (1 << bit))) && isReleased(bit)) {
       lsr |=  0b00000010; // set onRelease
       lsr &= ~0b00000001; // clear onPress
-      clearTimer();
     }
   }
   ppDat = pDat;

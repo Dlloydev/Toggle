@@ -1,48 +1,26 @@
 # Toggle    [![arduino-library-badge](https://www.ardu-badge.com/badge/Toggle.svg?)](https://www.ardu-badge.com/Toggle) [![PlatformIO Registry](https://badges.registry.platformio.org/packages/dlloydev/library/Toggle.svg)](https://registry.platformio.org/libraries/dlloydev/Toggle)
 
- Arduino bounce library for deglitching and debouncing hardware, signals and data. Works with all switch types, port expander and other 8-bit data sources. Three algorithm modes available. Robust mode ignores up to several consecutive spurious transitions.
+ Arduino button library for deglitching and debouncing switch contacts and logic data. Works with all switch types, port expander and other 8-bit data sources. Three algorithm modes available that can ignore up to several consecutive spurious transitions.
 
 ## Features
 
 ### Flexible Inputs
 
-The inputs can be from a single pin or several pins allowing the use of 2 or 3-position switches and up to seven debounced states. When linking to a data (byte) input, the debouncer can work with any selected bit or it can debounce all 8-bits in one Toggle instance. This method can be used for debouncing serial data from I/O expanders, sensors or stored values.  Examples:  [`Input_Bit_Test.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Bit_Test/Input_Bit_Test.ino) , [`Input_Bit.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Bit/Input_Bit.ino),  [`Input_Port_Test.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Port_Test/Input_Port_Test.ino) and [`Input_Port.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Port/Input_Port.ino).
-
-From the `Input_Port_Test.ino` example, this is the serial output with leading 0's added:
-
-```c++
-In: 00000000 Out: 00000000
-In: 10000001 Out: 00000000
-In: 10100011 Out: 00000000
-In: 00100111 Out: 00000001
-In: 00001110 Out: 00000011
-In: 00011110 Out: 00000111
-In: 00101111 Out: 00001111
-In: 01110110 Out: 00001111
-In: 11111100 Out: 00101111
-In: 11011000 Out: 01111110
-In: 01110000 Out: 01111100
-In: 01100011 Out: 01111000
-In: 11000000 Out: 01110000
-In: 10000100 Out: 01100000
-In: 00000000 Out: 01000000
-```
-
-Looking at the columns (bit data) top to bottom, it can be seen that the debounced `Out` data lags by only 2 samples (rows). It also can be seen that the input debouncer can tolerate a very noisy signal with up to 2 consecutive 1's or 0's that are anomalous or spurious in the `In` data.
+The inputs can be from a single pin or several pins allowing the use of 2 or 3-position switches and up to seven debounced states. When linking to a data (byte) input, the debouncer can work with any selected bit or it can debounce all 8-bits in one Toggle instance. Examples:  [`Input_Bit_Test.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Bit_Test/Input_Bit_Test.ino) , [`Input_Bit.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Bit/Input_Bit.ino),  [`Input_Port_Test.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Port_Test/Input_Port_Test.ino) and [`Input_Port.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Port/Input_Port.ino).
 
 ### Algorithms
 
 ```c++
 setAlgorithm(2);   // Robust Mode, 2 glitches ignored
-setAlgorithm(1);   // Normal Mode, 1 glitch ignored
-setAlgorithm(0);   // Quick Mode, responds to spurious transitions
+setAlgorithm(1);   // Average Mode, 1 glitch ignored
+setAlgorithm(0);   // Common Mode, can respond to spurious transitions
 ```
 
 In Robust Mode, the algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared. 
 
 ### Sampling
 
-Rather than use a basic timer strategy, the Toggle library uses sampling and only requires up to three samples on the input to to provide a clean (debounced) output. The sample period defaults to 5000μs (5ms) which works well the default Robust Mode. With these defaults, only 15ms is required for detecting a button switch being pressed or released. This may seem low when thinking of regular debouncig, but in order for this method to falsely detect a transition, it would require that there be a gap of greater than 15ms between bounces. From *[A Guide to Debouncing](http://www.ganssle.com/item/debouncing-switches-contacts-code.htm)*, (Anatomy of a Bounce):
+Rather than use a basic timer strategy, the Toggle library uses sampling and only requires up to three samples on the input to to provide a clean (debounced) output. The sample period defaults to 5000 μs (5 ms) which works well the default Robust Mode. With these defaults, only 15ms is required for detecting a button switch being pressed or released. This may seem low when thinking of regular debouncig, but in order for this method to falsely detect a transition, it would require that there be a gap of greater than 15ms between bounces. From *[A Guide to Debouncing](http://www.ganssle.com/item/debouncing-switches-contacts-code.htm)*, (Anatomy of a Bounce):
 
 > *Consider switch E again, that one with the pretty face that hides a  vicious 157 msec bouncing heart. One test showed the switch going to a  solid one for 81 msec, after which it dropped to a perfect zero for 42  msec before finally assuming its correct high state. Think what that  would do to pretty much any debounce code!* 
 
@@ -394,6 +372,30 @@ if (retrigger(500)) {
 
  
 
+## pressCode()
+
+##### Description
+
+- Up to 225 possible codes with one button. The returned code (*byte*) is easy to interpret when viewed in hex format. For example, `47` is 4 long, 7 short presses. `F2` is double-click, `F7` is 7 `F`ast clicks. 
+- Fast-click mode is detected if the first 2 clicks (presses) are less than 0.4 sec, then counts any extra presses if the duration is less than 1 sec, up to 15 max (code `FF`) 
+- Detection of long (greater than 1 sec) presses and short (less than 1 sec) presses occurs if the first press is 0.4 sec or longer. 
+- Detect up to 15 short presses
+- Detect up to 14 long presses
+- Returns code after button is released for 1.4 sec
+- simplifies your code while adding maximum functionality to one button
+
+##### Example
+
+```c++
+byte pCode = sw1.pressCode(1); // (1) serial print results
+```
+
+##### Example Sketch
+
+[Press_Code.ino](https://github.com/Dlloydev/Toggle/blob/main/examples/Press_Code/Press_Code.ino)
+
+
+
 ## Set and Get Functions
 
 
@@ -511,8 +513,8 @@ Elapsed milliseconds *(unsigned int)*.
 Sets the debouncer algorithm to one of three modes.
 
 - **Robust Mode (2):** This is the default mode where up to 2 spurious signal transitions (glitches) are ignored. This adds 2 sample periods time lag to the output signal.
-- **Normal Response (1):** This is mode ignores up to 1 spurious signal transition (glitch) and adds 1 sample period time lag to the output signal.
-- **Quick Response (0):** This is mode is similar to most debouncers where the response is near instant to a button or switch press, and the release won't be recognized until a debounce time period has expired. In this case, the debounce time period is calculated and set at 10 times the sample period.
+- **Average Mode (1):** This is mode ignores up to 1 spurious signal transition (glitch) and adds 1 sample period time lag to the output signal.
+- **Common Mode (0):** This is mode is similar to most debouncers where the response is near instant to a button or switch press, and the release won't be recognized until a debounce time period has expired. In this case, the debounce time period is calculated and set at 10 times the sample period.
 
 ##### Syntax
 
