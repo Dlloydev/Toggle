@@ -287,11 +287,11 @@ There are 4 timer functions to make timing operations simple to use in your code
 
 
 
-## blink(ms)
+## blink(ms, mode)
 
 ##### Description
 
-This function sets the duration in milliseconds that the returned value is true after the set timer mode - onPress( 0), onRelease (1), onChange (2). Useful to blink an LED.
+This function sets the duration in milliseconds that the returned value is true. The mode parameter sets what blink responds to: onPress( 0), onRelease (1), onChange (2).
 
 ##### Syntax
 
@@ -301,14 +301,16 @@ This function sets the duration in milliseconds that the returned value is true 
 
 **ms:** The number of milliseconds *(unsigned int)*
 
+**mode:** Blink onPress( 0), onRelease (1), onChange (2) *(byte)*
+
 ##### Returns
 
-*true* or *false*, depending on whether the elapsed time has expired after any state change. *(bool)*
+*true* or *false*, depending on whether the elapsed time has expired after any state change set by the mode parameter. *(bool)*
 
 ##### Example
 
 ```c++
-digitalWrite(ledPin, blink(100)); // blink an LED for 100ms just after each state change
+digitalWrite(ledPin, blink(100)); // blink an LED for 100ms just after state change set by mode
 ```
 
  
@@ -455,38 +457,6 @@ Sets the sample period in microseconds. Default is 5000 μs.
 ##### Returns
 
 None.
-
-
-
-## setTimerMode()
-
-##### Description
-
-Sets the timer mode to start onPress (0), onRelease (1) or onChange (2).
-
-##### Syntax
-
-`myInput.setTimerMode(0);` 
-
-##### Returns
-
-None.
-
-
-
-## getTimerMode()
-
-##### Description
-
-Gets the timer mode to start onPress (0), onRelease (1) or onChange (2).
-
-##### Syntax
-
-`myInput.getTimerMode();` 
-
-##### Returns
-
-Timer Mode *(byte)*.
 
 
 
