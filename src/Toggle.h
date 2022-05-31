@@ -23,8 +23,6 @@ class Toggle {
     void setInputMode(inMode inputMode);             // input, input_pullup, input_pulldown, input_bit, input_port
     void setInvertMode(bool invert);                 // invert false: pullup resistors are used, invert true: pulldown resistors
     void setSamplePeriodUs(uint16_t samplePeriodUs); // sample period in microseconds
-    void setTimerMode(uint8_t mode = 0);             // start onPress(0), onRelease(1), onChange(2)
-    uint8_t getTimerMode();                          // start onPress(0), onRelease(1), onChange(2)
     uint32_t getElapsedMs();                         // get elapsed ms since the last state change selected by timer mode
 
     bool isPressed(uint8_t bit = 0);                 // returns true if pressed
@@ -33,12 +31,12 @@ class Toggle {
     bool onRelease();                                // returns true if just released
     uint8_t onChange();                              // returns (0) no change, (1) onPress, (2) onRelease
     bool toggle(bool invert = 0, uint8_t bit = 0);   // returns true/false (toggle) on each press
-
-    bool blink(uint16_t ms);                         // returns true for given ms (blink) on mode press(0), release(1), change(2)
+    bool blink(uint16_t ms, uint8_t mode = 0);       // returns true for given ms (blink) on mode press(0), release(1), change(2)
     bool pressedFor(uint16_t ms);                    // returns true if pressed for at least the given ms
     bool releasedFor(uint16_t ms);                   // returns true if released for at least the given ms
     bool retrigger(uint16_t ms);                     // returns true each time the given ms expires while the button is pressed
     uint8_t pressCode(bool debug = 0);               // returns byte code for number of fast, short and long clicks
+    uint8_t debounceInput(uint8_t bit = 0);          // input debouncer
 
     bool isUP();                                     // functions for using 2 inputs with 3-position switches
     bool isMID();
@@ -50,7 +48,7 @@ class Toggle {
 
   private:
 
-    enum CLICK : uint32_t {MULTI = 400, LONG = 1000};
+    enum CLICK : uint16_t {MULTI = 400, LONG = 1000};
     enum fsm_t : uint8_t {  // finite state machine
       PB_DEFAULT = 0,
       PB_ON_PRESS = 1,
@@ -63,8 +61,6 @@ class Toggle {
 
     fsm_t _state = PB_DEFAULT;
 
-    uint8_t debounceInput(uint8_t bit = 0);          // input debouncer
-
     inMode _inputMode = inMode::input_pullup;        // input mode
     uint8_t _inA, _inB;                              // input pin
     uint8_t *_in;                                    // referenced to input variable
@@ -74,7 +70,7 @@ class Toggle {
     uint32_t us_timestamp;                           // most recent sample time μs
     uint8_t out = 0xFF, pOut = 0xFF;                 // debounced output and previous debounced output
     uint8_t csr = 0b10101010;                        // B7-B4: debounceCount, B3: first run B2: invert, B1-B0 algorithm
-    uint8_t lsr = 0b00000000;                        // B7-6: mode, B5 lastState, B4 toggle, B1 onRelease, B0 onPress
+    uint8_t lsr = 0b00000000;                        // B5 lastState, B4 toggle, B1 onRelease, B0 onPress
 
 };
 #endif

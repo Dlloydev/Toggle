@@ -44,6 +44,7 @@ releasedFor	KEYWORD2
 retrigger	KEYWORD2
 retrigger	KEYWORD2
 pressCode	KEYWORD2
+debounceInput	KEYWORD2
 isUP	KEYWORD2
 isMID	KEYWORD2
 isDN	KEYWORD2

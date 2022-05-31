@@ -10,7 +10,7 @@
 
 const byte num = 8; // number of buttons
 const byte pin[num] = {2, 3, 4, 5, 6, 7, 8, 9}; //button pins
-const byte ledPin = 13;
+const byte ledPin = LED_BUILTIN;
 const unsigned int blinkMs = 100; // led blink duration (ms)
 
 Toggle *sw = new Toggle[num];
@@ -31,6 +31,7 @@ void loop() {
     } else {
       ledState--;
     }
+    sw[i].onPress();
   }
   digitalWrite(ledPin, ledState);
 }

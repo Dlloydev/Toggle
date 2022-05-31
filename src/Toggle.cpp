@@ -1,5 +1,5 @@
 /************************************************
-   Toggle Library for Arduino - Version 3.1.1
+   Toggle Library for Arduino - Version 3.1.2
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ************************************************/
@@ -121,25 +121,15 @@ bool Toggle::toggle(bool invert, uint8_t bit) {
 
 /************* button timer functions ****************/
 
-void Toggle::setTimerMode(uint8_t mode) {
-  lsr &= ~0b11000000; // onPress (default)
-  if (mode == 1) lsr |=  0b01000000; // onRelease
-  else if (mode == 2) { // onChange
-    lsr &= ~0b01000000;
-    lsr |=  0b10000000;
-  }
-}
-
-uint8_t Toggle::getTimerMode() {
-  return (lsr & 0b11000000) >> 6;
-}
-
-bool Toggle::blink(uint16_t ms) {
+bool Toggle::blink(uint16_t ms, uint8_t mode) {
+  if (mode == 2 && onChange()) startUs = micros();
+  else if (mode == 1 && onChange() == 2) startUs = micros();
+  else if (onChange() == 1) startUs = micros();
   return (bool)(ms > (getElapsedMs()));
 }
 
 bool Toggle::pressedFor(uint16_t ms) {
-  if (getTimerMode()) setTimerMode(0); // start onPress
+  if (onChange() == 1) startUs = micros();
   if (isPressed() && getElapsedMs() > ms) {
     return true;
   }
@@ -147,7 +137,7 @@ bool Toggle::pressedFor(uint16_t ms) {
 }
 
 bool Toggle::releasedFor(uint16_t ms) {
-  if (getTimerMode() != 1) setTimerMode(1); // start onRelease
+  if (onChange() == 2) startUs = micros();
   if (isReleased() && getElapsedMs() > ms) {
     return true;
   }
@@ -155,9 +145,8 @@ bool Toggle::releasedFor(uint16_t ms) {
 }
 
 bool Toggle::retrigger(uint16_t ms) {
-  if (getTimerMode()) setTimerMode(0); // start onPress
   if (isPressed() && getElapsedMs() > ms) {
-    //clearTimer();
+    startUs = micros();
     return true;
   }
   return false;
@@ -171,13 +160,9 @@ uint8_t Toggle::pressCode(bool debug) {
   static uint8_t pCode = 0, code = 0;
   static uint32_t elapsedMs = 0;
 
-  //Serial.print(F(" startUs: ")); Serial.print(startUs); Serial.print(F("  "));
-  //Serial.print(F(" elapsedMS: ")); Serial.print(getElapsedMs()); Serial.print(F("  "));
-  //Serial.print(F(" pCode: ")); Serial.print(pCode, HEX); Serial.print(F("  "));
-
   switch (_state) {
     case PB_DEFAULT:
-      setTimerMode(2); // onChange
+      //setTimerMode(2); // onChange
       elapsedMs = getElapsedMs();
       if (pCode && isReleased() && (elapsedMs > (CLICK::LONG + CLICK::MULTI))) _state = PB_DONE;
       if (onChange()) startUs = micros();
@@ -187,7 +172,7 @@ uint8_t Toggle::pressCode(bool debug) {
       }
       if (onRelease()) {
         if (debug) {
-          Serial.print(F(" Pressed:\t")); Serial.print(elapsedMs); Serial.println(" ms");
+          Serial.print(F(" Pressed for:\t")); Serial.print(elapsedMs); Serial.println(" ms");
         }
         _state = PB_ON_RELEASE;
       }
