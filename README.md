@@ -1,6 +1,6 @@
 # Toggle    [![arduino-library-badge](https://www.ardu-badge.com/badge/Toggle.svg?)](https://www.ardu-badge.com/Toggle) [![PlatformIO Registry](https://badges.registry.platformio.org/packages/dlloydev/library/Toggle.svg)](https://registry.platformio.org/libraries/dlloydev/Toggle)
 
- Arduino button library for deglitching and debouncing switch contacts and logic data. Works with all switch types, port expander and other 8-bit data sources. Three algorithm modes available that can ignore up to several consecutive spurious transitions.
+ Arduino button library for debouncing switch contacts and logic data.  New pressCode() function detects fast, short and long button presses for 225 combinations. Works with all switch types, port expanders and other 8-bit data sources. Debounce algorithm ignores several consecutive  spurious transitions.
 
 ## Features
 
@@ -8,19 +8,24 @@
 
 The inputs can be from a single pin or several pins allowing the use of 2 or 3-position switches and up to seven debounced states. When linking to a data (byte) input, the debouncer can work with any selected bit or it can debounce all 8-bits in one Toggle instance. Examples:  [`Input_Bit_Test.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Bit_Test/Input_Bit_Test.ino) , [`Input_Bit.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Bit/Input_Bit.ino),  [`Input_Port_Test.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Port_Test/Input_Port_Test.ino) and [`Input_Port.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Port/Input_Port.ino).
 
-### Algorithms
+### Algorithm
 
-```c++
-setAlgorithm(2);   // Robust Mode, 2 glitches ignored
-setAlgorithm(1);   // Average Mode, 1 glitch ignored
-setAlgorithm(0);   // Common Mode, can respond to spurious transitions
-```
+The debounce algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared.![image](https://user-images.githubusercontent.com/63488701/171260623-befe88a4-66c4-44a2-a38b-6c14c715a92d.png)
 
-In Robust Mode, the algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared. 
+| ppDat | pDat | dat  | **R** | **S** | **Q**      | **State** |
+| ----- | ---- | ---- | ----- | ----- | ---------- | --------- |
+| 0     | 0    | 0    | 1     | 0     | 0          | Reset     |
+| 0     | 0    | 1    | 0     | 0     | Last State | No Change |
+| 0     | 1    | 0    | 0     | 0     | Last State | No Change |
+| 0     | 1    | 1    | 0     | 0     | Last State | No Change |
+| 1     | 0    | 0    | 0     | 0     | Last State | No Change |
+| 1     | 0    | 1    | 0     | 0     | Last State | No Change |
+| 1     | 1    | 0    | 0     | 0     | Last State | No Change |
+| 1     | 1    | 1    | 0     | 1     | 1          | Set       |
 
 ### Sampling
 
-Rather than use a basic timer strategy, the Toggle library uses sampling and only requires up to three samples on the input to to provide a clean (debounced) output. The sample period defaults to 5000 μs (5 ms) which works well the default Robust Mode. With these defaults, only 15ms is required for detecting a button switch being pressed or released. This may seem low when thinking of regular debouncig, but in order for this method to falsely detect a transition, it would require that there be a gap of greater than 15ms between bounces. From *[A Guide to Debouncing](http://www.ganssle.com/item/debouncing-switches-contacts-code.htm)*, (Anatomy of a Bounce):
+The sample period defaults to 5000 μs. With this setting, only 15ms is required for detecting a button switch being pressed or released. This may seem low when thinking of regular debouncig, but in order for this method to falsely detect a transition, it would require that there be a gap of greater than 15ms between bounces. From *[A Guide to Debouncing](http://www.ganssle.com/item/debouncing-switches-contacts-code.htm)*, (Anatomy of a Bounce):
 
 > *Consider switch E again, that one with the pretty face that hides a  vicious 157 msec bouncing heart. One test showed the switch going to a  solid one for 81 msec, after which it dropped to a perfect zero for 42  msec before finally assuming its correct high state. Think what that  would do to pretty much any debounce code!* 
 
@@ -117,11 +122,8 @@ None.
 ##### Example
 
 ```c++
-/* a button or switch is connected from pin 2 to ground
-   5000 μs sample interval (default)
-   pullup enabled (default)
-   inverted = false (default)
-   algorithm = 2 glitches "Robust Mode" (default) */
+// a button or switch is connected from pin 2 to ground, 5000 μs sample interval (default),
+// pullup enabled (default), inverted = false (default)
 Toggle myInput(2);
 
 // same as above, but a 3 position switch is connected to pins 2 and 3
@@ -155,7 +157,7 @@ None.
 
 ## Primary Functions
 
-There are 5 primary functions when using 1 input pin or data bit. Shown below is a plot showing the returned values that are verically offset for clarity. Here, the algorithm was set to 0 glitches. In this case, the debounce interval is hard coded to 10 sample periods. The response is near instant "press" detection and delayed "release" detection which is similar to how most common debouncers operate:
+There are 5 primary functions when using 1 input pin or data bit. Shown below is a plot showing the returned values that are verically offset for clarity:
 
 ![image](https://user-images.githubusercontent.com/63488701/169307791-e4b02e03-4399-4984-87a2-755dafaf3f47.png)
 
@@ -473,26 +475,6 @@ Gets the elapsed ms since the last state change selected by timer mode.
 ##### Returns
 
 Elapsed milliseconds *(unsigned int)*.
-
-
-
-## setAlgorithm()
-
-##### Description
-
-Sets the debouncer algorithm to one of three modes.
-
-- **Robust Mode (2):** This is the default mode where up to 2 spurious signal transitions (glitches) are ignored. This adds 2 sample periods time lag to the output signal.
-- **Average Mode (1):** This is mode ignores up to 1 spurious signal transition (glitch) and adds 1 sample period time lag to the output signal.
-- **Common Mode (0):** This is mode is similar to most debouncers where the response is near instant to a button or switch press, and the release won't be recognized until a debounce time period has expired. In this case, the debounce time period is calculated and set at 10 times the sample period.
-
-##### Syntax
-
-`myInput.setAlgorithm(2);` 
-
-##### Returns
-
-Control and Status Register (csr) value *(byte)*.
 
 
 

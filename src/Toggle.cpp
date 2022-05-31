@@ -1,5 +1,5 @@
 /************************************************
-   Toggle Library for Arduino - Version 3.1.2
+   Toggle Library for Arduino - Version 3.1.3
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ************************************************/
@@ -46,27 +46,15 @@ void Toggle::poll(uint8_t bit) {
     if (csr & 0b00000100) dat = ~dat; // if invert mode
     if (bit > 7) bit = 0;
     debounceInput(bit);
-    if ((csr & 0xF0) < 0xA0) csr += 0x10; // increment debounceCount (10 max)
   } // run sample
 } // poll
-
-uint8_t Toggle::setAlgorithm(uint8_t glitches) {
-  csr |=  0b00000010;    // 2 glitches ignored (default)
-  csr &= ~0b00000001;
-  if (glitches == 1) {  // 1 glitch ignored
-    csr |=  0b00000001;
-    csr &= ~0b00000010;
-  }
-  else if (glitches == 0) csr &= ~0b00000011;  // 0 glitches ignored
-  return csr;
-}
 
 void Toggle::setInputMode(inMode inputMode) {
   _inputMode = inputMode;
 }
 
 void Toggle::setInvertMode(bool invert) {
-  if (invert)csr |= 0b00000100; //set
+  if (invert) csr |= 0b00000100; //set
   else csr &= ~0b00000100; //clear
 }
 
@@ -86,7 +74,6 @@ bool Toggle::isReleased(uint8_t bit) {
 
 bool Toggle::onPress() {
   if (lsr & 0b00000001) { // onPress
-    if ((csr & 3) == 0 && (csr & 0xF0) == 0xA0) csr &= ~0xF0; // debounceCount = 0;;
     lsr &=  ~0b00000001; // clear onPress flag
     pOut = out;
     return true;
@@ -96,7 +83,6 @@ bool Toggle::onPress() {
 
 bool Toggle::onRelease() {
   if (lsr & 0b00000010) { // onRelease
-    if ((csr & 3) == 0 && (csr & 0xF0) == 0xA0) csr &= ~0xF0; // debounceCount = 0;
     lsr &=  ~0b00000010; // clear onRelease flag
     pOut = out;
     return true;
@@ -162,7 +148,6 @@ uint8_t Toggle::pressCode(bool debug) {
 
   switch (_state) {
     case PB_DEFAULT:
-      //setTimerMode(2); // onChange
       elapsedMs = getElapsedMs();
       if (pCode && isReleased() && (elapsedMs > (CLICK::LONG + CLICK::MULTI))) _state = PB_DONE;
       if (onChange()) startUs = micros();
@@ -227,29 +212,13 @@ uint8_t Toggle::pressCode(bool debug) {
 **************************************************************************************************/
 uint8_t Toggle::debounceInput(uint8_t bit) {
   pOut = out;
-  uint8_t a, b, c, bits = 2;
+  uint8_t bits = 2;
   if (_inputMode == inMode::input_bit) bits = 1;
   if (_inputMode == inMode::input_port) bits = 8;
 
   for (int i = bit; i < bit + bits; i++) {
-    a = dat & (1 << i);
-    b = pDat & (1 << i);
-    c = ppDat & (1 << i);
-
-    if (csr & 0b00000010) { // 2 glitches ignored
-      if (a && b && c) out |= (1 << i);
-      else if (!a && !b && !c) out &= ~(1 << i);
-
-    } else if (csr & 0b00000001) { // 1 glitch ignored
-      if (a && b) out |= (1 << i);
-      else if (!a && !b) out &= ~(1 << i);
-
-    } else { // immediate ON response, delayed OFF
-      if ((csr & 0xF0) == 0xA0) { // if samples == 10
-        if (a) out |= (1 << i);
-        else if (!a) out &= ~(1 << i);
-      }
-    }
+    if ((dat & (1 << i)) && (pDat & (1 << i)) && (ppDat & (1 << i))) out |= (1 << i);
+    else if (!(dat & (1 << i)) && !(pDat & (1 << i)) && !(ppDat & (1 << i))) out &= ~(1 << i);
   }
   if ((pOut & (1 << bit)) && !isReleased(bit)) {
     lsr |=  0b00000001; // set onPress

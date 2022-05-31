@@ -25,12 +25,9 @@ sw9	KEYWORD1
 ##########################################
 
 poll	KEYWORD2
-setAlgorithm	KEYWORD2
 setInputMode	KEYWORD2
 setInvertMode	KEYWORD2
 setSamplePeriodUs	KEYWORD2
-setTimerMode	KEYWORD2
-getTimerMode	KEYWORD2
 getElapsedMs	KEYWORD2
 isPressed	KEYWORD2
 isReleased	KEYWORD2
@@ -41,7 +38,6 @@ toggle	KEYWORD2
 blink	KEYWORD2
 pressedFor	KEYWORD2
 releasedFor	KEYWORD2
-retrigger	KEYWORD2
 retrigger	KEYWORD2
 pressCode	KEYWORD2
 debounceInput	KEYWORD2

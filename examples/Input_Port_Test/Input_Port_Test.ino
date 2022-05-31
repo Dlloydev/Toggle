@@ -58,7 +58,6 @@ void setup() {
   Serial.begin(115200);
   myInput.begin(Input);
   myInput.setInputMode(myInput.inMode::input_port);
-  myInput.setAlgorithm(2); // ignore(2), (1) or (0) glitches for robust, normal and quick response
   myInput.setSamplePeriodUs(20); // 0-65535μs
 
   for (int i = 0; i < 15; i++) {
