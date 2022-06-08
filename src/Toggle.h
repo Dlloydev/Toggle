@@ -26,9 +26,9 @@ class Toggle {
     bool isReleased(uint8_t bit = 0);                // returns true if released
     bool onPress();                                  // returns true if just pressed
     bool onRelease();                                // returns true if just released
-    uint8_t onChange();                              // returns (0) no change, (1) onPress, (2) onRelease
+    uint8_t onChange();                              // returns: no change(0), onPress(1), onRelease(2)
     bool toggle(bool invert = 0, uint8_t bit = 0);   // returns true/false (toggle) on each press
-    bool blink(uint16_t ms, uint8_t mode = 0);       // returns true for given ms (blink) on mode press(0), release(1), change(2)
+    bool blink(uint16_t ms, uint8_t mode = 1);       // returns true for given ms (blink) on mode: change(0), press(1), release(2),
     bool pressedFor(uint16_t ms);                    // returns true if pressed for at least the given ms
     bool releasedFor(uint16_t ms);                   // returns true if released for at least the given ms
     bool retrigger(uint16_t ms);                     // returns true each time the given ms expires while the button is pressed

@@ -8,7 +8,7 @@
 
 The inputs can be from a single pin or several pins allowing the use of 2 or 3-position switches and up to seven debounced states. When linking to a data (byte) input, the debouncer can work with any selected bit or it can debounce all 8-bits in one Toggle instance. Examples:  [`Input_Bit_Test.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Bit_Test/Input_Bit_Test.ino) , [`Input_Bit.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Bit/Input_Bit.ino),  [`Input_Port_Test.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Port_Test/Input_Port_Test.ino) and [`Input_Port.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Port/Input_Port.ino).
 
-### Algorithm
+### Debounce Algorithm
 
 The debounce algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared.![image](https://user-images.githubusercontent.com/63488701/171260623-befe88a4-66c4-44a2-a38b-6c14c715a92d.png)
 
@@ -293,7 +293,7 @@ There are 4 timer functions to make timing operations simple to use in your code
 
 ##### Description
 
-This function sets the duration in milliseconds that the returned value is true. The mode parameter sets what blink responds to: onPress( 0), onRelease (1), onChange (2).
+This function sets the duration in milliseconds that the returned value is true. The mode parameter sets what blink responds to: onChange (0), onPress( 1) default, onRelease (2).
 
 ##### Syntax
 
@@ -303,7 +303,7 @@ This function sets the duration in milliseconds that the returned value is true.
 
 **ms:** The number of milliseconds *(unsigned int)*
 
-**mode:** Blink onPress( 0), onRelease (1), onChange (2) *(byte)*
+**mode:** Blink  onChange (0), onPress( 1) default, onRelease (2) *(byte)*
 
 ##### Returns
 
@@ -311,11 +311,7 @@ This function sets the duration in milliseconds that the returned value is true.
 
 ##### Example
 
-```c++
-digitalWrite(ledPin, blink(100)); // blink an LED for 100ms just after state change set by mode
-```
-
- 
+ [Toggle_Basic.ino](https://github.com/Dlloydev/Toggle/blob/main/examples/Toggle_Basic/Toggle_Basic.ino)
 
 ## pressedFor(ms)
 

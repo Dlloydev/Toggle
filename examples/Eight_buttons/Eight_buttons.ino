@@ -1,10 +1,9 @@
-/******************************************************
-  Eight Buttons (or Switches) Example:
-  ====================================
+/****************************************************
+  EIGHT BUTTONS EXAMPLE:
   An example that checks the status of eight buttons.
   All input pins will have their pullups enabled.
   The LED blinks for each on press transition.
-  *****************************************************/
+  ***************************************************/
 
 #include <Toggle.h>
 
@@ -31,7 +30,6 @@ void loop() {
     } else {
       ledState--;
     }
-    sw[i].onPress();
   }
   digitalWrite(ledPin, ledState);
 }

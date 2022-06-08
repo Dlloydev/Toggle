@@ -1,28 +1,25 @@
-/************************************************************************
-  Toggle Basic Example:
-  =====================
-  A simple example that toggles an LED each time a button is pressed
-  or switch is closed.  The input pin will have its pullup enabled.
-  The serial monitor indicates all switch transitions.
-  ***********************************************************************/
+/**********************************************************
+  TOGGLE BASIC EXAMPLE:
+  This example blinks the built in LED as configured below.
+  INPUT_PULLUP and debouncing are pre-configured.
+  *********************************************************/
 
-#include <Toggle.h>
+#include "Toggle.h"
 
 const byte buttonPin = 2;
 const byte ledPin = LED_BUILTIN;
 
-Toggle sw1(buttonPin);
+const byte blinkMs = 100; // blink duration (ms)
+const byte blinkMode = 1; // 0: on change, 1: on press (default), 2: on release
+
+Toggle button(buttonPin);
 
 void setup() {
-  while (!Serial) { }; // Leonardo
-  Serial.begin(115200);
-  sw1.begin(buttonPin);
+  button.begin(buttonPin);
   pinMode(ledPin, OUTPUT);
 }
 
 void loop() {
-  sw1.poll();
-  if (sw1.onPress()) Serial.println(F("sw1: OFF⇒ON"));
-  if (sw1.onRelease()) Serial.println(F("sw1: ON⇒OFF"));
-  digitalWrite(ledPin, sw1.toggle());
+  button.poll();
+  digitalWrite(ledPin, button.blink(blinkMs, blinkMode));
 }

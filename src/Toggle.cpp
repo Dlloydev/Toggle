@@ -1,5 +1,5 @@
 /************************************************
-   Toggle Library for Arduino - Version 3.1.3
+   Toggle Library for Arduino - Version 3.1.4
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ************************************************/
@@ -108,9 +108,11 @@ bool Toggle::toggle(bool invert, uint8_t bit) {
 /************* button timer functions ****************/
 
 bool Toggle::blink(uint16_t ms, uint8_t mode) {
-  if (mode == 2 && onChange()) startUs = micros();
-  else if (mode == 1 && onChange() == 2) startUs = micros();
-  else if (onChange() == 1) startUs = micros();
+  if (mode == 2 && onChange() == 2) startUs = micros();
+  else if (mode == 1 && onChange() == 1) startUs = micros();
+  else if (mode == 0 && onChange()) startUs = micros();
+  onPress();
+  onRelease();
   return (bool)(ms > (getElapsedMs()));
 }
 
@@ -152,7 +154,6 @@ uint8_t Toggle::pressCode(bool debug) {
       if (pCode && isReleased() && (elapsedMs > (CLICK::LONG + CLICK::MULTI))) _state = PB_DONE;
       if (onChange()) startUs = micros();
       if (onPress()) {
-        //Serial.print(F(" Released:\t")); Serial.print(elapsedMs); Serial.println(" ms");
         _state = PB_ON_PRESS;
       }
       if (onRelease()) {
