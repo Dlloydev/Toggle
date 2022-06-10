@@ -1,11 +1,9 @@
-/*******************************************************************************
-  TURN A MOMENTARY PUSHBUTTON INTO A TOGGLE SWITCH:
+/***********************************************
+  USE A MOMENTARY PUSHBUTTON AS A TOGGLE SWITCH:
   The button is connected from input pin to GND.
   INPUT_PULLUP and debouncing are pre-configured.
-  The built in LED changes state each time the button is pressed.
-  For the LED to change state on release, un-comment button.setInvertMode(1);
-  For LED startup in opposite state, use digitalWrite(ledPin, button.toggle(1));
-  ******************************************************************************/
+  The built in LED changes state as configured.
+  **********************************************/
 
 #include <Toggle.h>
 
@@ -16,7 +14,9 @@ Toggle button(buttonPin);
 
 void setup() {
   button.begin(buttonPin);
-  //button.setInvertMode(1);
+  button.setToggleState(0);    // set initial state 0 or 1
+  button.setToggleTrigger(0);  // set trigger onPress: 0, or onRelease: 1
+
   pinMode(ledPin, OUTPUT);
 }
 

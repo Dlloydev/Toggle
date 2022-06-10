@@ -8,6 +8,7 @@
 
 Toggle	KEYWORD1
 myInput	KEYWORD1
+myButton	KEYWORD1
 sw	KEYWORD1
 sw0	KEYWORD1
 sw1	KEYWORD1
@@ -26,7 +27,10 @@ sw9	KEYWORD1
 
 poll	KEYWORD2
 setInputMode	KEYWORD2
-setInvertMode	KEYWORD2
+setInputInvert	KEYWORD2
+toggle	KEYWORD2
+setToggleState	KEYWORD2
+setToggleTrigger	KEYWORD2
 setSamplePeriodUs	KEYWORD2
 getElapsedMs	KEYWORD2
 isPressed	KEYWORD2
@@ -34,13 +38,12 @@ isReleased	KEYWORD2
 onPress	KEYWORD2
 onRelease	KEYWORD2
 onChange	KEYWORD2
-toggle	KEYWORD2
 blink	KEYWORD2
 pressedFor	KEYWORD2
 releasedFor	KEYWORD2
 retrigger	KEYWORD2
 pressCode	KEYWORD2
-debounceInput	KEYWORD2
+debouncer	KEYWORD2
 isUP	KEYWORD2
 isMID	KEYWORD2
 isDN	KEYWORD2
@@ -57,6 +60,6 @@ input	LITERAL1
 input_pullup	LITERAL1
 input_pulldown	LITERAL1
 input_bit	LITERAL1
-input_port	LITERAL1
+input_byte	LITERAL1
 MULTI	LITERAL1
 LONG	LITERAL1

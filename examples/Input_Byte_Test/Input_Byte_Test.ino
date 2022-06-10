@@ -1,5 +1,5 @@
 /*************************************************************************
-  Input Port Debouncer Test Example:
+  Input Byte Debouncer Test Example:
   ==================================
   This example demonstrates how you can debounce an 8-bit byte (8 signals)
   in just one Toggle object. The Arduino pin functions are not used.
@@ -57,7 +57,7 @@ void setup() {
   while (!Serial) { }; // Leonardo
   Serial.begin(115200);
   myInput.begin(Input);
-  myInput.setInputMode(myInput.inMode::input_port);
+  myInput.setInputMode(myInput.inputMode::input_byte);
   myInput.setSamplePeriodUs(20); // 0-65535μs
 
   for (int i = 0; i < 15; i++) {
@@ -66,7 +66,7 @@ void setup() {
     Serial.print(F("In: "));
     Serial.print(dat[i], BIN);
     Serial.print(F(" Out: "));
-    Serial.println(myInput.debounceInput(), BIN);
+    Serial.println(myInput.debouncer(), BIN);
   }
 }
 

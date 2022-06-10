@@ -1,12 +1,12 @@
 # Toggle    [![arduino-library-badge](https://www.ardu-badge.com/badge/Toggle.svg?)](https://www.ardu-badge.com/Toggle) [![PlatformIO Registry](https://badges.registry.platformio.org/packages/dlloydev/library/Toggle.svg)](https://registry.platformio.org/libraries/dlloydev/Toggle)
 
- Arduino button library for debouncing switch contacts and logic data.  New pressCode() function detects fast, short and long button presses for 225 combinations. Works with all switch types, port expanders and other 8-bit data sources. Debounce algorithm ignores several consecutive  spurious transitions.
+Arduino button library for debouncing switch contacts and input data.  New pressCode() function detects fast, short and long button presses for 225 combinations. Works with all switch types, port expanders and other 8-bit data sources. Debounce algorithm ignores several consecutive  spurious transitions.
 
 ## Features
 
 ### Flexible Inputs
 
-The inputs can be from a single pin or several pins allowing the use of 2 or 3-position switches and up to seven debounced states. When linking to a data (byte) input, the debouncer can work with any selected bit or it can debounce all 8-bits in one Toggle instance. Examples:  [`Input_Bit_Test.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Bit_Test/Input_Bit_Test.ino) , [`Input_Bit.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Bit/Input_Bit.ino),  [`Input_Port_Test.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Port_Test/Input_Port_Test.ino) and [`Input_Port.ino`](https://github.com/Dlloydev/Toggle/blob/main/examples/Input_Port/Input_Port.ino).
+The inputs can be from a single pin or several pins allowing the use of 2 or 3-position switches and up to seven debounced states. When linking to a data (byte) input, the debouncer can work with any selected bit or it can debounce all 8-bits in one Toggle instance. See [examples](https://github.com/Dlloydev/Toggle/tree/main/examples).
 
 ### Debounce Algorithm
 
@@ -122,15 +122,9 @@ None.
 ##### Example
 
 ```c++
-// a button or switch is connected from pin 2 to ground, 5000 μs sample interval (default),
-// pullup enabled (default), inverted = false (default)
-Toggle myInput(2);
-
-// same as above, but a 3 position switch is connected to pins 2 and 3
-Toggle myInput(2, 3);
-
-// a byte variable is linked to the Toggle object, defaults are same as above
-Toggle myInput(*Input);
+Toggle myInput(2);      // Button connected pin 2 to GND, INPUT_PULLUP, debounced
+Toggle myInput(2, 3);   // SPDT switch connected pins 2 and 3 to GND, INPUT_PULLUP, debounced
+Toggle myInput(*Input); // Byte variable as input, debounced
 ```
 
 
@@ -267,19 +261,18 @@ else {
 
 ##### Description
 
-This function will toggle the return value after each `onPress` state change. Useful to easily toggle an LED.
+This function can be used to convert a momentary push button to a toggle switch. By default, the retuen value will toggle `true-false` then `false-true` for  each `onPress` action of the button.
 
-##### Syntax
-
-`myInput.toggle(invert);` 
+- The `setToggleState()` function sets the initial state (*true* or *false*)
+- The `setToggleTrigger()` function sets the trigger mode: *false*: `onPress`, *true*: `onRelease`
 
 ##### Parameters
 
-**invert:** can be used to invert the initial toggle state *(bool)*
+None.
 
 ##### Returns
 
-*true* or *false*, toggles after each `onPress` state change. *(bool)
+*true* or *false*, (*bool*). Toggles as configured by `setToggleTrigger()`. Default is trigger `onPress`
 
 
 
@@ -420,13 +413,12 @@ None.
 myInput.setInputMode(sw1.inMode::input_input);     // high impedance input
 myInput.setInputMode(sw1.inMode::input_pullup);    // pullup resistor enabled (default)
 myInput.setInputMode(sw1.inMode::input_pulldown);  // pulldown resistor enabled (ESP32) 
-myInput.setInputMode(sw1.inMode::input_bit);       // input byte (bit0)
-myInput.setInputMode(sw1.inMode::input_port);      // input byte (8-bit)
+myInput.setInputMode(sw1.inMode::input_byte);      // input byte (8-bit)
 ```
 
  
 
-## setInvertMode()
+## setInputInvert()
 
 ##### Description
 
@@ -434,7 +426,7 @@ Set true if the button or switch pulls the signal high when pressed. Default is 
 
 ##### Syntax
 
-`myInput.setInvertMode(true);` 
+`myInput.setInputInvert(true);` 
 
 ##### Returns
 

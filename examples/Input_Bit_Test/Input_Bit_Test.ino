@@ -24,7 +24,7 @@ void setup() {
   while (!Serial) { }; // Leonardo
   Serial.begin(115200);
   myInput.begin(Input);
-  myInput.setInputMode(myInput.inMode::input_port);
+  myInput.setInputMode(myInput.inputMode::input_byte);
   myInput.setSamplePeriodUs(20); // 0-65535μs
 
   for (int i = 0; i < 47; i++) {

@@ -1,10 +1,10 @@
-/**************************************************************************
-  Input Bit Example:
-  =======================
-  This example demonstrates how you can debounce any bit of a byte variable
+/******************************************************************
+  Input Byte Example:
+  ===================
+  This example demonstrates how you can debounce any byte variable
   in the sketch. The Arduino pin functions are not used.
-  Open Serial Monitor to view the bit status.
-  *************************************************************************/
+  Open Serial Monitor to view the debounced byte status.
+  *****************************************************************/
 
 #include <Toggle.h>
 
@@ -20,17 +20,17 @@ void setup() {
   while (!Serial) { }; // Leonardo
   Serial.begin(115200);
   myInput.begin(Input);
-  myInput.setInputMode(myInput.inMode::input_bit);
+  myInput.setInputMode(myInput.inputMode::input_byte); // debounce all bits
   myInput.setSamplePeriodUs(20); // 0-65535μs
 }
 
 void loop() {
-  myInput.poll(bit);
+  myInput.poll();
   if (myInput.onPress()) {
     Serial.print(F("b")); Serial.print(bit); Serial.println(F(": OFF⇒ON"));
-   }
+  }
   if (myInput.onRelease()) {
     Serial.print(F("b")); Serial.print(bit); Serial.println(F(": ON⇒OFF"));
   }
-   digitalWrite(ledPin, myInput.toggle(bit));
+  digitalWrite(ledPin, myInput.toggle());
 }
