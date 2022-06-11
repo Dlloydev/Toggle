@@ -278,7 +278,23 @@ None.
 
 ## Timer Functions
 
-There are 4 timer functions to make timing operations simple to use in your code.
+## clearTimer()
+
+##### Description
+
+Simply clears the ms timer used for the timer functions. 
+
+##### Syntax
+
+`myInput.clearTimer();` 
+
+##### Parameters
+
+None.
+
+##### Returns
+
+None.
 
 
 
@@ -305,6 +321,8 @@ This function sets the duration in milliseconds that the returned value is true.
 ##### Example
 
  [Toggle_Basic.ino](https://github.com/Dlloydev/Toggle/blob/main/examples/Toggle_Basic/Toggle_Basic.ino)
+
+
 
 ## pressedFor(ms)
 

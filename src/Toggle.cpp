@@ -1,5 +1,5 @@
 /************************************************
-   Toggle Library for Arduino - Version 3.1.5
+   Toggle Library for Arduino - Version 3.1.6
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ************************************************/
@@ -145,17 +145,24 @@ bool Toggle::getLastToggleState() { // private
 
 /************* button timer functions ****************/
 
+void Toggle::clearTimer() {
+  startUs = micros();
+}
+
+uint32_t Toggle::getElapsedMs() {
+  return (micros() - startUs) * 0.001;
+}
+
 bool Toggle::blink(uint16_t ms, uint8_t mode) {
-  if (mode == 2 && onChange() == 2) startUs = micros();
-  else if (mode == 1 && onChange() == 1) startUs = micros();
-  else if (mode == 0 && onChange()) startUs = micros();
+  if (mode == 2 && onChange() == 2) clearTimer();
+  else if (mode == 1 && onChange() == 1) clearTimer();
+  else if (mode == 0 && onChange()) clearTimer();
   onPress();
   onRelease();
   return (bool)(ms > (getElapsedMs()));
 }
 
 bool Toggle::pressedFor(uint16_t ms) {
-  if (onChange() == 1) startUs = micros();
   if (isPressed() && getElapsedMs() > ms) {
     return true;
   }
@@ -163,7 +170,6 @@ bool Toggle::pressedFor(uint16_t ms) {
 }
 
 bool Toggle::releasedFor(uint16_t ms) {
-  if (onChange() == 2) startUs = micros();
   if (isReleased() && getElapsedMs() > ms) {
     return true;
   }
@@ -172,14 +178,10 @@ bool Toggle::releasedFor(uint16_t ms) {
 
 bool Toggle::retrigger(uint16_t ms) {
   if (isPressed() && getElapsedMs() > ms) {
-    startUs = micros();
+    clearTimer();
     return true;
   }
   return false;
-}
-
-uint32_t Toggle::getElapsedMs() {
-  return (micros() - startUs) * 0.001;
 }
 
 uint8_t Toggle::pressCode(bool debug) {
@@ -190,7 +192,7 @@ uint8_t Toggle::pressCode(bool debug) {
     case PB_DEFAULT:
       elapsedMs = getElapsedMs();
       if (pCode && isReleased() && (elapsedMs > (CLICK::LONG + CLICK::MULTI))) _state = PB_DONE;
-      if (onChange()) startUs = micros();
+      if (onChange()) clearTimer();
       if (onPress()) {
         _state = PB_ON_PRESS;
       }

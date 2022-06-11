@@ -24,6 +24,7 @@ class Toggle {
     void setToggleState(bool toggleState);             // set toggle state
     void setToggleTrigger(bool change);                // set toggle trigger mode: onPress(0), onRelease(1)
     void setSamplePeriodUs(uint16_t samplePeriodUs);   // sample period in microseconds
+    void clearTimer();                                 // clear ms timer
     uint32_t getElapsedMs();                           // get elapsed ms since the last state change selected by timer mode
     bool isPressed(uint8_t bit = 0);                   // returns true if pressed
     bool isReleased(uint8_t bit = 0);                  // returns true if released
