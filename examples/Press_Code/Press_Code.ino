@@ -21,6 +21,5 @@ void setup() {
 
 void loop() {
   sw1.poll();
-  sw1.pressCode(1); // open serial monitor to view results
-  //code = sw1.pressCode(); // no debug
+  sw1.pressCode(1); // print: (1) on () off
 }

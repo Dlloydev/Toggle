@@ -1,85 +1,20 @@
 # Toggle    [![arduino-library-badge](https://www.ardu-badge.com/badge/Toggle.svg?)](https://www.ardu-badge.com/Toggle) [![PlatformIO Registry](https://badges.registry.platformio.org/packages/dlloydev/library/Toggle.svg)](https://registry.platformio.org/libraries/dlloydev/Toggle)
 
-Arduino button library for debouncing switch contacts and input data.  New pressCode() function detects fast, short and long button presses for 225 combinations. Works with all switch types, port expanders and other 8-bit data sources. Debounce algorithm ignores several consecutive  spurious transitions.
+Arduino button debounce library for various switch types, port expanders and other 8-bit data sources. Fast and robust debounce algorithm.
 
 ## Features
 
-### Flexible Inputs
+- Fast, robust and symetrical [debouncing](https://github.com/Dlloydev/Toggle/wiki/Debounce-Algorithm) of both press and release button transitions
+- Works with various [switch types](https://github.com/Dlloydev/Toggle/wiki/Switch-Connections)
+- Identifies 7 unique transitions for 3-position switches
+- Use momentary button as toggle switch (configurable)
+- Return up to 225 codes from one button
 
-The inputs can be from a single pin or several pins allowing the use of 2 or 3-position switches and up to seven debounced states. When linking to a data (byte) input, the debouncer can work with any selected bit or it can debounce all 8-bits in one Toggle instance. See [examples](https://github.com/Dlloydev/Toggle/tree/main/examples).
+## Examples
 
-### Debounce Algorithm
+- Lets give some examples a [trial run](https://github.com/Dlloydev/Toggle/wiki/Wokwi-Examples).
 
-The debounce algorithm adds only 2 sample periods of time lag to the output signal. A 3-sample stable period is required for an output bit to change. Therefore, to set an output bit, 3 consecutive 1's are required. When 3 consecutive 0's are detected, that bit value is cleared.![image](https://user-images.githubusercontent.com/63488701/171260623-befe88a4-66c4-44a2-a38b-6c14c715a92d.png)
-
-| ppDat | pDat | dat  | **R** | **S** | **Q**      | **State** |
-| ----- | ---- | ---- | ----- | ----- | ---------- | --------- |
-| 0     | 0    | 0    | 1     | 0     | 0          | Reset     |
-| 0     | 0    | 1    | 0     | 0     | Last State | No Change |
-| 0     | 1    | 0    | 0     | 0     | Last State | No Change |
-| 0     | 1    | 1    | 0     | 0     | Last State | No Change |
-| 1     | 0    | 0    | 0     | 0     | Last State | No Change |
-| 1     | 0    | 1    | 0     | 0     | Last State | No Change |
-| 1     | 1    | 0    | 0     | 0     | Last State | No Change |
-| 1     | 1    | 1    | 0     | 1     | 1          | Set       |
-
-### Sampling
-
-The sample period defaults to 5000 μs. With this setting, only 15ms is required for detecting a button switch being pressed or released. This may seem low when thinking of regular debouncig, but in order for this method to falsely detect a transition, it would require that there be a gap of greater than 15ms between bounces. From *[A Guide to Debouncing](http://www.ganssle.com/item/debouncing-switches-contacts-code.htm)*, (Anatomy of a Bounce):
-
-> *Consider switch E again, that one with the pretty face that hides a  vicious 157 msec bouncing heart. One test showed the switch going to a  solid one for 81 msec, after which it dropped to a perfect zero for 42  msec before finally assuming its correct high state. Think what that  would do to pretty much any debounce code!* 
-
-Using the Toggle library, this switch could be debounced with a 15ms sample period and ignoring dropouts of up to 45ms.
-
-## Switch Connections
-
-Switching between GND and digital pin is the default solution used by this library. External pull-up resistors can be added if desired, but the internal pullups should be sufficient for most applications. What might be of consideration is providing sufficient wetting current to overcome switch contact oxidation.
-
-A set of connections are shown where 0.1μF capacitors are optionally added. This adds contact wetting current and hardware signal filtering (beneficial for interrupt applications) . 
-
-
-
-#### Connections shown below are for 2-position switches (SPST, SPDT, DPDT) using 1 input:
-
-![image](https://user-images.githubusercontent.com/63488701/166920176-7bd21bb6-10f9-4cd1-9467-0c2289e698c5.png)
-
-![image](https://user-images.githubusercontent.com/63488701/166920355-3edac199-4aae-4615-a790-152c2f3acec5.png)
-
- 
-
-#### Connections shown below are for 3-position switches (SP3T, DP3T) using 2 inputs:
-
-
-
-#### Toggle Switch (SP3T, On-Off-On):
-
-![image](https://user-images.githubusercontent.com/63488701/166512833-eda91d35-60bd-4846-95cb-326a442edfac.png)
-
-
-
-#### Slide Switch (Single Pole, 3-position):
-
-![image](https://user-images.githubusercontent.com/63488701/166516607-82f0c9c1-e627-4769-bb15-5df6c0bd8784.png)
-
-
-
-#### Rotary Switch (Double Pole, 3-position):
-
-![image](https://user-images.githubusercontent.com/63488701/166517355-0869726d-dca0-4125-bb3e-2bebe63f6afb.png)
-
-#### The switch functions when using 2 input pins:
-
-```
-isUP();
-isMID();
-isDN();
-UPtoMID();
-MIDtoDN();
-DNtoMID();
-MIDtoUP();
-```
-
-The switch has 3 positions referred to as UP, MID (center) and DN (down). The first 3 functions will continuously return true if the switch is at that position. The last 4 functions return true (once only) if the switch has just transitioned to that position.
+- See sketch [examples](https://github.com/Dlloydev/Toggle/tree/main/examples).
 
 
 
@@ -401,9 +336,9 @@ if (retrigger(500)) {
 byte pCode = sw1.pressCode(1); // (1) serial print results
 ```
 
-##### Example Sketch
+##### Example Sketch  [Press_Code.ino](https://github.com/Dlloydev/Toggle/blob/main/examples/Press_Code/Press_Code.ino)
 
-[Press_Code.ino](https://github.com/Dlloydev/Toggle/blob/main/examples/Press_Code/Press_Code.ino)
+[Trial run on *WOKWi*](https://wokwi.com/projects/334284248581145170)
 
 
 
