@@ -1,9 +1,11 @@
-/***********************************************
+/***************************************************************
   USE A MOMENTARY PUSHBUTTON AS A TOGGLE SWITCH:
   The button is connected from input pin to GND.
   INPUT_PULLUP and debouncing are pre-configured.
   The built in LED changes state as configured.
-  **********************************************/
+  Try on Wokwi UNO: https://wokwi.com/projects/334321940028195411
+          ESP32-S2: https://wokwi.com/projects/334322217034711635
+ ****************************************************************/
 
 #include <Toggle.h>
 

@@ -4,6 +4,8 @@
   A simple example that demonstrates how fast-clicks, short presses and
   long presses can be automatically detected and combined into a byte code.
   In debug mode, the serial monitor shows timing results and code.
+  Try on Wokwi UNO: https://wokwi.com/projects/334284248581145170
+          ESP32-S2: https://wokwi.com/projects/334320246564323924
   ***********************************************************************/
 
 #include <Toggle.h>

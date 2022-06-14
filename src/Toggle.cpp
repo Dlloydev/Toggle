@@ -1,5 +1,5 @@
 /************************************************
-   Toggle Library for Arduino - Version 3.1.6
+   Toggle Library for Arduino - Version 3.1.7
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ************************************************/
@@ -159,10 +159,12 @@ bool Toggle::blink(uint16_t ms, uint8_t mode) {
   else if (mode == 0 && onChange()) clearTimer();
   onPress();
   onRelease();
-  return (bool)(ms > (getElapsedMs()));
+  if ((startUs * 0.001) > ms) return (bool)(ms > (getElapsedMs()));
+  else return 0;
 }
 
 bool Toggle::pressedFor(uint16_t ms) {
+  if (onPress()) clearTimer();
   if (isPressed() && getElapsedMs() > ms) {
     return true;
   }
@@ -170,6 +172,7 @@ bool Toggle::pressedFor(uint16_t ms) {
 }
 
 bool Toggle::releasedFor(uint16_t ms) {
+  if (onRelease()) clearTimer();
   if (isReleased() && getElapsedMs() > ms) {
     return true;
   }
@@ -177,6 +180,7 @@ bool Toggle::releasedFor(uint16_t ms) {
 }
 
 bool Toggle::retrigger(uint16_t ms) {
+  if (onPress()) clearTimer();
   if (isPressed() && getElapsedMs() > ms) {
     clearTimer();
     return true;
@@ -191,7 +195,7 @@ uint8_t Toggle::pressCode(bool debug) {
   switch (_state) {
     case PB_DEFAULT:
       elapsedMs = getElapsedMs();
-      if (pCode && isReleased() && (elapsedMs > (CLICK::LONG + CLICK::MULTI))) _state = PB_DONE;
+      if (pCode && isReleased() && (elapsedMs > (CLICK::LONG))) _state = PB_DONE;
       if (onChange()) clearTimer();
       if (onPress()) {
         _state = PB_ON_PRESS;

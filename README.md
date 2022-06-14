@@ -5,7 +5,7 @@ Arduino button debounce library for various switch types, port expanders and oth
 ## Features
 
 - Fast, robust and symetrical [debouncing](https://github.com/Dlloydev/Toggle/wiki/Debounce-Algorithm) of both press and release button transitions
-- Works with various [switch types](https://github.com/Dlloydev/Toggle/wiki/Switch-Connections)
+- Works with various [switch types and connections](https://github.com/Dlloydev/Toggle/wiki/Switch-Connections).
 - Identifies 7 unique transitions for 3-position switches
 - Use momentary button as toggle switch (configurable)
 - Return up to 225 codes from one button
