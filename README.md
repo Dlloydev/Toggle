@@ -10,13 +10,20 @@ Arduino button debounce library for various switch types, port expanders and oth
 - Use momentary button as toggle switch (configurable)
 - Return up to 225 codes from one button
 
-## Examples
+## Examples (Wokwi)
 
-- Lets give some examples a [trial run](https://github.com/Dlloydev/Toggle/wiki/Wokwi-Examples).
+- Do a trial run for evaluation.
+- Your suggestions, Issues and Discussions are welcome [here](https://github.com/Dlloydev/Toggle).
 
-- See sketch [examples](https://github.com/Dlloydev/Toggle/tree/main/examples).
-
-
+| ESP32-S2                                                     | UNO                                                          |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [Toggle_Basic](https://wokwi.com/projects/334453650605736531) | [Toggle_Basic](https://wokwi.com/projects/334443631893021266) |
+| [Use_Button_As_Toggle.ino](https://wokwi.com/projects/334322217034711635) | [Use_Button_As_Toggle.ino](https://wokwi.com/projects/334321940028195411) |
+| [Eight_Buttons.ino](https://wokwi.com/projects/334413532415132244) | [Eight_Buttons.ino](https://wokwi.com/projects/334411953607803475) |
+| [Pressed_For.ino](https://wokwi.com/projects/334454109412262483) | [Pressed_For.ino](https://wokwi.com/projects/334457647787934292) |
+| [Released_For.ino](https://wokwi.com/projects/334458628485415508) | [Released_For.ino](https://wokwi.com/projects/334458460245590611) |
+| [Retrigger_While_Pressed.ino](https://wokwi.com/projects/334459280465855059) | [Retrigger_While_Pressed.ino](https://wokwi.com/projects/334458963671122515) |
+| [Press_Code.ino](https://wokwi.com/projects/334320246564323924) | [Press_Code.ino](https://wokwi.com/projects/334284248581145170) |
 
 ## Toggle Library Reference
 
@@ -25,8 +32,6 @@ To use this library
 ```c++
 #include <Toggle.h>
 ```
-
-
 
 ## Constructors
 
@@ -62,8 +67,6 @@ Toggle myInput(2, 3);   // SPDT switch connected pins 2 and 3 to GND, INPUT_PULL
 Toggle myInput(*Input); // Byte variable as input, debounced
 ```
 
-
-
 ## poll()
 
 ##### Description
@@ -82,15 +85,11 @@ This function is placed at the top of the loop. Initializes the Button object an
 
 None.
 
-
-
 ## Primary Functions
 
 There are 5 primary functions when using 1 input pin or data bit. Shown below is a plot showing the returned values that are verically offset for clarity:
 
 ![image](https://user-images.githubusercontent.com/63488701/169307791-e4b02e03-4399-4984-87a2-755dafaf3f47.png)
-
-
 
 ## onChange()
 
@@ -122,8 +121,6 @@ if (myInput.onChange() == 2) {
 }
 ```
 
-
-
 ## onPress()
 
 ## onRelease()
@@ -154,8 +151,6 @@ if (myInput.onPress())
 	// do something (true only once per press)
 }
 ```
-
- 
 
 ## isPressed()
 
@@ -190,8 +185,6 @@ else {
 }
 ```
 
-
-
 ## toggle()
 
 ##### Description
@@ -208,8 +201,6 @@ None.
 ##### Returns
 
 *true* or *false*, (*bool*). Toggles as configured by `setToggleTrigger()`. Default is trigger `onPress`
-
-
 
 ## Timer Functions
 
@@ -230,8 +221,6 @@ None.
 ##### Returns
 
 None.
-
-
 
 ## blink(ms, mode)
 
@@ -256,8 +245,6 @@ This function sets the duration in milliseconds that the returned value is true.
 ##### Example
 
  [Toggle_Basic.ino](https://github.com/Dlloydev/Toggle/blob/main/examples/Toggle_Basic/Toggle_Basic.ino)
-
-
 
 ## pressedFor(ms)
 
@@ -288,8 +275,6 @@ if (myInput.pressedFor(500)) {
 }
 ```
 
- 
-
 ## retrigger(ms)
 
 ##### Description
@@ -316,8 +301,6 @@ if (retrigger(500)) {
 } 
 ```
 
- 
-
 ## pressCode()
 
 ##### Description
@@ -340,11 +323,7 @@ byte pCode = sw1.pressCode(1); // (1) serial print results
 
 [Trial run on *WOKWi*](https://wokwi.com/projects/334284248581145170)
 
-
-
 ## Set and Get Functions
-
-
 
 ## setInputMode()
 
@@ -369,8 +348,6 @@ myInput.setInputMode(sw1.inMode::input_pulldown);  // pulldown resistor enabled 
 myInput.setInputMode(sw1.inMode::input_byte);      // input byte (8-bit)
 ```
 
- 
-
 ## setInputInvert()
 
 ##### Description
@@ -384,8 +361,6 @@ Set true if the button or switch pulls the signal high when pressed. Default is 
 ##### Returns
 
 None.
-
-
 
 ## setSampleUs()
 
@@ -401,8 +376,6 @@ Sets the sample period in microseconds. Default is 5000 μs.
 
 None.
 
-
-
 ## getElapsedMs(()
 
 ##### Description
@@ -417,11 +390,7 @@ Gets the elapsed ms since the last state change selected by timer mode.
 
 Elapsed milliseconds *(unsigned int)*.
 
-
-
 ---
-
-
 
 ### References
 
