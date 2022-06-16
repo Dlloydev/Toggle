@@ -17,20 +17,7 @@ void Toggle::begin(uint8_t inA, uint8_t inB) {
     _inB = inB;
     us_timestamp = micros();
     startUs = us_timestamp;
-    if (_inA != 255) {
-      if (_inputMode == inputMode::input_pullup) pinMode(_inA, INPUT_PULLUP);
-      else if (_inputMode == inputMode::input) pinMode(_inA, INPUT);
-#if (defined(ESP32) || defined(ARDUINO_ARCH_ESP32))
-      else if (_inputMode == inputMode::input_pulldown) pinMode(_inA, INPUT_PULLDOWN);
-#endif
-    }
-    if (_inB != 255) {
-      if (_inputMode == inputMode::input_pullup) pinMode(_inB, INPUT_PULLUP);
-      else if (_inputMode == inputMode::input) pinMode(_inB, INPUT);
-#if (defined(ESP32) || defined(ARDUINO_ARCH_ESP32))
-      else if (_inputMode == inputMode::input_pulldown) pinMode(_inB, INPUT_PULLDOWN);
-#endif
-    }
+    setInputMode(inputMode::input_pullup);
   }
 }
 
@@ -51,6 +38,20 @@ void Toggle::poll(uint8_t bit) {
 
 void Toggle::setInputMode(inputMode inputMode) {
   _inputMode = inputMode;
+  if (_inA != 255) {
+    if (_inputMode == inputMode::input_pullup) pinMode(_inA, INPUT_PULLUP);
+    else if (_inputMode == inputMode::input) pinMode(_inA, INPUT);
+#if (defined(ESP32) || defined(ARDUINO_ARCH_ESP32))
+    else if (_inputMode == inputMode::input_pulldown) pinMode(_inA, INPUT_PULLDOWN);
+#endif
+  }
+  if (_inB != 255) {
+    if (_inputMode == inputMode::input_pullup) pinMode(_inB, INPUT_PULLUP);
+    else if (_inputMode == inputMode::input) pinMode(_inB, INPUT);
+#if (defined(ESP32) || defined(ARDUINO_ARCH_ESP32))
+    else if (_inputMode == inputMode::input_pulldown) pinMode(_inB, INPUT_PULLDOWN);
+#endif
+  }
 }
 
 void Toggle::setSamplePeriodUs(uint16_t period) {

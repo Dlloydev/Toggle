@@ -12,7 +12,7 @@ Arduino button debounce library for various switch types, port expanders and oth
 
 ## Examples (Wokwi)
 
-- Do a trial run for evaluation.
+- Do a test run for evaluation.
 - Your suggestions, Issues and Discussions are welcome [here](https://github.com/Dlloydev/Toggle).
 
 | ESP32-S2                                                     | UNO                                                          |
@@ -24,6 +24,7 @@ Arduino button debounce library for various switch types, port expanders and oth
 | [Released_For.ino](https://wokwi.com/projects/334458628485415508) | [Released_For.ino](https://wokwi.com/projects/334458460245590611) |
 | [Retrigger_While_Pressed.ino](https://wokwi.com/projects/334459280465855059) | [Retrigger_While_Pressed.ino](https://wokwi.com/projects/334458963671122515) |
 | [Press_Code.ino](https://wokwi.com/projects/334320246564323924) | [Press_Code.ino](https://wokwi.com/projects/334284248581145170) |
+| [ESP32_Input_Pulldown.ino](https://wokwi.com/projects/334554744838160980) |                                                              |
 
 ## Toggle Library Reference
 
@@ -310,7 +311,7 @@ if (retrigger(500)) {
 - Detection of long (greater than 1 sec) presses and short (less than 1 sec) presses occurs if the first press is 0.4 sec or longer. 
 - Detect up to 15 short presses
 - Detect up to 14 long presses
-- Returns code after button is released for 1.4 sec
+- Returns code after button is released for 1 sec
 - simplifies your code while adding maximum functionality to one button
 
 ##### Example
