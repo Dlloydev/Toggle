@@ -307,11 +307,11 @@ if (retrigger(500)) {
 ##### Description
 
 - Up to 225 possible codes with one button. The returned code (*byte*) is easy to interpret when viewed in hex format. For example, `47` is 4 long, 7 short presses. `F2` is double-click, `F7` is 7 `F`ast clicks. 
-- Fast-click mode is detected if the first 2 clicks (presses) are less than 0.4 sec, then counts any extra presses if the duration is less than 1 sec, up to 15 max (code `FF`) 
-- Detection of long (greater than 1 sec) presses and short (less than 1 sec) presses occurs if the first press is 0.4 sec or longer. 
+- Fast-click mode is detected if the first several clicks (presses) are less than 0.2 sec, then all presses are counted as fast, up to 15 max (code `FF`) 
+- Detection of long presses occurs if the first press is greater than 0.2 sec, then all presses greater than 0.2 sec are counted as long and all presses less than 0.2 sec are counted as short presses. 
 - Detect up to 15 short presses
 - Detect up to 14 long presses
-- Returns code after button is released for 1 sec
+- Returns code after button is released for 0.5 sec
 - simplifies your code while adding maximum functionality to one button
 
 ##### Example

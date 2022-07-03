@@ -1,5 +1,5 @@
 /************************************************
-   Toggle Library for Arduino - Version 3.1.7
+   Toggle Library for Arduino - Version 3.1.8
    by dlloydev https://github.com/Dlloydev/Toggle
    Licensed under the MIT License.
  ************************************************/
@@ -196,7 +196,7 @@ uint8_t Toggle::pressCode(bool debug) {
   switch (_state) {
     case PB_DEFAULT:
       elapsedMs = getElapsedMs();
-      if (pCode && isReleased() && (elapsedMs > (CLICK::LONG))) _state = PB_DONE;
+      if (pCode && isReleased() && (elapsedMs > (CLICK::DONE))) _state = PB_DONE;
       if (onChange()) clearTimer();
       if (onPress()) {
         _state = PB_ON_PRESS;
@@ -214,12 +214,13 @@ uint8_t Toggle::pressCode(bool debug) {
       break;
 
     case PB_ON_RELEASE:
-      if ((elapsedMs < CLICK::MULTI) && (!pCode || (pCode > 0xEF))) _state = PB_MULTI_CLICKS;
-      else if (elapsedMs < CLICK::LONG) _state = PB_SHORT_CLICKS;
-      else _state = PB_LONG_CLICKS;
+      if (elapsedMs > CLICK::FAST && (!pCode || pCode >= 0x10)) _state = PB_LONG_CLICKS;
+      else if (elapsedMs < CLICK::FAST && pCode >= 0x10) _state = PB_SHORT_CLICKS;
+      else if (elapsedMs < CLICK::FAST && !pCode) _state = PB_FAST_CLICKS;
+      else  _state = PB_SHORT_CLICKS;
       break;
 
-    case PB_MULTI_CLICKS:
+    case PB_FAST_CLICKS:
       pCode |= 0xF0;
       if ((pCode & 0x0F) < 0x0F) pCode += 1;
       _state = PB_DEFAULT;

@@ -47,12 +47,12 @@ class Toggle {
 
   private:
 
-    enum CLICK : uint16_t {MULTI = 400, LONG = 1000};
+    enum CLICK : uint16_t {FAST = 200, DONE = 500};
     enum fsm_t : uint8_t {  // finite state machine
       PB_DEFAULT = 0,
       PB_ON_PRESS = 1,
       PB_ON_RELEASE = 2,
-      PB_MULTI_CLICKS = 3,
+      PB_FAST_CLICKS = 3,
       PB_SHORT_CLICKS = 4,
       PB_LONG_CLICKS = 5,
       PB_DONE = 6
